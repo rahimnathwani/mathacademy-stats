@@ -6,7 +6,7 @@ const WINDOW_END_LOCAL = new Date().toISOString().slice(0, 19);
 
 const WINDOW_START_LOCAL = new Date(Date.now() - 3 * 365 * 24 * 60 * 60 * 1000).toISOString().slice(0, 19);
 
-const BASE = "https://www.mathacademy.com/api/previous-tasks/";
+const BASE = "https://mathacademy.com/api/previous-tasks/";
 
 const MAX_PAGES = 200; // big safety cap
 
@@ -92,7 +92,15 @@ if (!r.ok) throw new Error(`HTTP ${r.status} ${r.statusText}`);
 
 const data = await r.json();
 
-if (!Array.isArray(data)) throw new Error("Expected array page");
+if (!Array.isArray(data)) {
+  const dataType = data === null ? 'null' : typeof data;
+  const dataPreview = JSON.stringify(data, null, 2).slice(0, 500);
+  throw new Error(
+    `Expected array page but received ${dataType}.\n` +
+    `URL: ${url}\n` +
+    `Response preview: ${dataPreview}${dataPreview.length === 500 ? '...' : ''}`
+  );
+}
 
 return data;
 

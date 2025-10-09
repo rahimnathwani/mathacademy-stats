@@ -1,6 +1,6 @@
 import type { Activity } from '@/types/mathacademy';
 
-const BASE_URL = "https://www.mathacademy.com/api/previous-tasks/";
+const BASE_URL = "https://mathacademy.com/api/previous-tasks/";
 const MAX_PAGES = 200;
 const SLEEP_MS = 200;
 const OVERLAP_DAYS = 1000;
@@ -47,14 +47,30 @@ async function fetchPage(cutoff: Date): Promise<Activity[]> {
   const url = BASE_URL + enc(cutoff);
   if (VERBOSE) console.log("GET", url);
   
-  const response = await fetch(url, { credentials: "include" });
+  let response;
+  try {
+    response = await fetch(url, { credentials: "include" });
+  } catch (err) {
+    throw new Error(
+      `Failed to fetch: ${err instanceof Error ? err.message : String(err)}\n` +
+      `URL: ${url}\n` +
+      `This might be a network error, CORS issue, or missing host_permissions in the extension manifest.`
+    );
+  }
+  
   if (!response.ok) {
-    throw new Error(`HTTP ${response.status} ${response.statusText}`);
+    throw new Error(`HTTP ${response.status} ${response.statusText} - URL: ${url}`);
   }
   
   const data = await response.json();
   if (!Array.isArray(data)) {
-    throw new Error("Expected array page");
+    const dataType = data === null ? 'null' : typeof data;
+    const dataPreview = JSON.stringify(data, null, 2).slice(0, 500);
+    throw new Error(
+      `Expected array page but received ${dataType}.\n` +
+      `URL: ${url}\n` +
+      `Response preview: ${dataPreview}${dataPreview.length === 500 ? '...' : ''}`
+    );
   }
   
   return data;
