@@ -48,8 +48,11 @@ function App() {
     try {
       const stats = generateStats(activities);
       
-      // Store stats in browser storage
-      await browser.storage.local.set({ statsData: stats });
+      // Store both stats and raw activities in browser storage
+      await browser.storage.local.set({ 
+        statsData: stats,
+        activitiesData: activities 
+      });
       
       // Open stats page in new tab
       // Cross-browser compatible URL construction

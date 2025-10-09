@@ -21,13 +21,18 @@ interface ProcessedActivity {
   xpPerMinute: number;
 }
 
-export function generateStats(activities: Activity[]): CourseStats[] {
+export function generateStats(activities: Activity[], activityType?: string): CourseStats[] {
   // Filter out activities where completed - started > 2 hours
   const TWO_HOURS_MS = 2 * 60 * 60 * 1000;
   
   const processedActivities: ProcessedActivity[] = [];
   
   for (const activity of activities) {
+    // Filter by activity type if specified
+    if (activityType && activity.type !== activityType) {
+      continue;
+    }
+    
     const startedMs = Date.parse(activity.started);
     const completedMs = Date.parse(activity.completed);
     
