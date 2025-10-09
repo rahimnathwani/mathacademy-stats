@@ -1,0 +1,1235 @@
+[
+  {
+    "id": 5808573,
+    "type": "Lesson",
+    "topicCourseId": 99,
+    "locked": null,
+    "importance": 2,
+    "reason": null,
+    "progress": 1,
+    "points": 7,
+    "pointsAwarded": 7,
+    "mp": null,
+    "mpAwarded": null,
+    "mpDecayRate": null,
+    "topic": {
+      "id": 3758,
+      "name": "Comparing Measures of Spread",
+      "prerequisites": [
+        {
+          "id": 2516,
+          "name": "Comparing Measures of Center",
+          "urlSlug": "comparing-measures-of-center"
+        }
+      ],
+      "course": {
+        "id": 99,
+        "name": "Prealgebra"
+      }
+    },
+    "started": "2025-08-22T12:36:57.000Z",
+    "completed": "2025-08-22T14:05:08.000Z",
+    "timeCompletedStr": "2:05 PM",
+    "dateCompletedStr": "Fri, Aug 22nd, 2025",
+    "test": {
+      "id": null,
+      "name": null,
+      "timeLimit": null,
+      "questionCount": null,
+      "course": {
+        "id": 99,
+        "name": "Prealgebra"
+      }
+    },
+    "progressStr": "100%"
+  },
+  {
+    "id": 5728783,
+    "type": "Lesson",
+    "topicCourseId": 99,
+    "locked": null,
+    "importance": 2,
+    "reason": null,
+    "progress": 1,
+    "points": 7,
+    "pointsAwarded": 9,
+    "mp": null,
+    "mpAwarded": null,
+    "mpDecayRate": null,
+    "topic": {
+      "id": 2516,
+      "name": "Comparing Measures of Center",
+      "prerequisites": [
+        {
+          "id": 2482,
+          "name": "Box Plots",
+          "urlSlug": "box-plots"
+        },
+        {
+          "id": 2502,
+          "name": "Symmetry, Skew, and Outliers",
+          "urlSlug": "symmetry-skew-and-outliers"
+        },
+        {
+          "id": 2510,
+          "name": "Histograms",
+          "urlSlug": "histograms"
+        }
+      ],
+      "course": {
+        "id": 99,
+        "name": "Prealgebra"
+      }
+    },
+    "started": "2025-08-20T16:02:25.000Z",
+    "completed": "2025-08-22T12:29:14.000Z",
+    "timeCompletedStr": "12:29 PM",
+    "dateCompletedStr": "Fri, Aug 22nd, 2025",
+    "test": {
+      "id": null,
+      "name": null,
+      "timeLimit": null,
+      "questionCount": null,
+      "course": {
+        "id": 99,
+        "name": "Prealgebra"
+      }
+    },
+    "progressStr": "100%"
+  },
+  {
+    "id": 5797909,
+    "type": "Review",
+    "topicCourseId": 99,
+    "locked": null,
+    "importance": 1,
+    "reason": null,
+    "progress": 1,
+    "points": 4,
+    "pointsAwarded": 6,
+    "mp": null,
+    "mpAwarded": null,
+    "mpDecayRate": null,
+    "topic": {
+      "id": 3757,
+      "name": "Measuring Quartiles and IQR From Dot Plots",
+      "prerequisites": [
+        {
+          "id": 2480,
+          "name": "Range, Quartiles, and IQR",
+          "urlSlug": "range-quartiles-and-iqr"
+        },
+        {
+          "id": 2500,
+          "name": "Measuring Centrality From Dot Plots",
+          "urlSlug": "measuring-centrality-from-dot-plots"
+        }
+      ],
+      "course": {
+        "id": 99,
+        "name": "Prealgebra"
+      }
+    },
+    "started": "2025-08-21T20:48:06.000Z",
+    "completed": "2025-08-21T20:51:33.000Z",
+    "timeCompletedStr": "8:51 PM",
+    "dateCompletedStr": "Thu, Aug 21st, 2025",
+    "test": {
+      "id": null,
+      "name": null,
+      "timeLimit": null,
+      "questionCount": null,
+      "course": {
+        "id": 99,
+        "name": "Prealgebra"
+      }
+    },
+    "progressStr": "100%"
+  },
+  {
+    "id": 5779859,
+    "type": "Review",
+    "topicCourseId": 30,
+    "locked": null,
+    "importance": 1,
+    "reason": null,
+    "progress": 1,
+    "points": 4,
+    "pointsAwarded": 6,
+    "mp": null,
+    "mpAwarded": null,
+    "mpDecayRate": null,
+    "topic": {
+      "id": 2401,
+      "name": "Operations on Fractions With Line Plots",
+      "prerequisites": [
+        {
+          "id": 525,
+          "name": "Subtracting Mixed Numbers With Unlike Denominators Using Improper Fractions",
+          "urlSlug": "subtracting-mixed-numbers-with-unlike-denominators-using-improper-fractions"
+        },
+        {
+          "id": 535,
+          "name": "Two-Digit by One-Digit Division Using the Standard Algorithm",
+          "urlSlug": "two-digit-by-one-digit-division-using-the-standard-algorithm"
+        },
+        {
+          "id": 2408,
+          "name": "Creating and Interpreting Line Plots With Fractions",
+          "urlSlug": "creating-and-interpreting-line-plots-with-fractions"
+        }
+      ],
+      "course": {
+        "id": 30,
+        "name": "5th Grade Math"
+      }
+    },
+    "started": "2025-08-21T20:42:33.000Z",
+    "completed": "2025-08-21T20:47:02.000Z",
+    "timeCompletedStr": "8:47 PM",
+    "dateCompletedStr": "Thu, Aug 21st, 2025",
+    "test": {
+      "id": null,
+      "name": null,
+      "timeLimit": null,
+      "questionCount": null,
+      "course": {
+        "id": 99,
+        "name": "Prealgebra"
+      }
+    },
+    "progressStr": "100%"
+  },
+  {
+    "id": 5779964,
+    "type": "Lesson",
+    "topicCourseId": 99,
+    "locked": null,
+    "importance": 2,
+    "reason": null,
+    "progress": 1,
+    "points": 7,
+    "pointsAwarded": 7,
+    "mp": null,
+    "mpAwarded": null,
+    "mpDecayRate": null,
+    "topic": {
+      "id": 3755,
+      "name": "Removing Outliers",
+      "prerequisites": [
+        {
+          "id": 2480,
+          "name": "Range, Quartiles, and IQR",
+          "urlSlug": "range-quartiles-and-iqr"
+        },
+        {
+          "id": 2481,
+          "name": "Mean Absolute Deviation",
+          "urlSlug": "mean-absolute-deviation"
+        },
+        {
+          "id": 2517,
+          "name": "Outliers",
+          "urlSlug": "outliers"
+        }
+      ],
+      "course": {
+        "id": 99,
+        "name": "Prealgebra"
+      }
+    },
+    "started": "2025-08-21T20:05:51.000Z",
+    "completed": "2025-08-21T20:37:04.000Z",
+    "timeCompletedStr": "8:37 PM",
+    "dateCompletedStr": "Thu, Aug 21st, 2025",
+    "test": {
+      "id": null,
+      "name": null,
+      "timeLimit": null,
+      "questionCount": null,
+      "course": {
+        "id": 99,
+        "name": "Prealgebra"
+      }
+    },
+    "progressStr": "100%"
+  },
+  {
+    "id": 5779764,
+    "type": "Review",
+    "topicCourseId": 99,
+    "locked": null,
+    "importance": 1,
+    "reason": null,
+    "progress": 1,
+    "points": 4,
+    "pointsAwarded": 6,
+    "mp": null,
+    "mpAwarded": null,
+    "mpDecayRate": null,
+    "topic": {
+      "id": 2554,
+      "name": "Understanding Proportional Relationships From Descriptions",
+      "prerequisites": [
+        {
+          "id": 2553,
+          "name": "Understanding Proportional Relationships Using Tables",
+          "urlSlug": "understanding-proportional-relationships-using-tables"
+        }
+      ],
+      "course": {
+        "id": 99,
+        "name": "Prealgebra"
+      }
+    },
+    "started": "2025-08-20T16:14:56.000Z",
+    "completed": "2025-08-20T16:20:13.000Z",
+    "timeCompletedStr": "4:20 PM",
+    "dateCompletedStr": "Wed, Aug 20th, 2025",
+    "test": {
+      "id": null,
+      "name": null,
+      "timeLimit": null,
+      "questionCount": null,
+      "course": {
+        "id": 99,
+        "name": "Prealgebra"
+      }
+    },
+    "progressStr": "100%"
+  },
+  {
+    "id": 5779619,
+    "type": "Review",
+    "topicCourseId": 99,
+    "locked": 0,
+    "importance": 1,
+    "reason": null,
+    "progress": 1,
+    "points": 4,
+    "pointsAwarded": 6,
+    "mp": null,
+    "mpAwarded": null,
+    "mpDecayRate": null,
+    "topic": {
+      "id": 2498,
+      "name": "Comparing Data Sets Using Range and Quartiles",
+      "prerequisites": [
+        {
+          "id": 2482,
+          "name": "Box Plots",
+          "urlSlug": "box-plots"
+        },
+        {
+          "id": 2501,
+          "name": "Measuring Range and MAD From Dot Plots",
+          "urlSlug": "measuring-range-and-mad-from-dot-plots"
+        },
+        {
+          "id": 3757,
+          "name": "Measuring Quartiles and IQR From Dot Plots",
+          "urlSlug": "measuring-quartiles-and-iqr-from-dot-plots"
+        }
+      ],
+      "course": {
+        "id": 99,
+        "name": "Prealgebra"
+      }
+    },
+    "started": "2025-08-20T16:05:07.000Z",
+    "completed": "2025-08-20T16:13:31.000Z",
+    "timeCompletedStr": "4:13 PM",
+    "dateCompletedStr": "Wed, Aug 20th, 2025",
+    "test": {
+      "id": null,
+      "name": null,
+      "timeLimit": null,
+      "questionCount": null,
+      "course": {
+        "id": 99,
+        "name": "Prealgebra"
+      }
+    },
+    "progressStr": "100%"
+  },
+  {
+    "id": 5779380,
+    "type": "Review",
+    "topicCourseId": 99,
+    "locked": null,
+    "importance": 1,
+    "reason": null,
+    "progress": 1,
+    "points": 4,
+    "pointsAwarded": 6,
+    "mp": null,
+    "mpAwarded": null,
+    "mpDecayRate": null,
+    "topic": {
+      "id": 2551,
+      "name": "Solving Unit Rate Problems Using Ratios of Fractions",
+      "prerequisites": [
+        {
+          "id": 571,
+          "name": "Fraction Multiplication Number Sense",
+          "urlSlug": "fraction-multiplication-number-sense"
+        },
+        {
+          "id": 2550,
+          "name": "Calculating Unit Rates Associated With Ratios of Fractions",
+          "urlSlug": "calculating-unit-rates-associated-with-ratios-of-fractions"
+        }
+      ],
+      "course": {
+        "id": 99,
+        "name": "Prealgebra"
+      }
+    },
+    "started": "2025-08-20T16:02:53.000Z",
+    "completed": "2025-08-20T16:04:54.000Z",
+    "timeCompletedStr": "4:04 PM",
+    "dateCompletedStr": "Wed, Aug 20th, 2025",
+    "test": {
+      "id": null,
+      "name": null,
+      "timeLimit": null,
+      "questionCount": null,
+      "course": {
+        "id": 99,
+        "name": "Prealgebra"
+      }
+    },
+    "progressStr": "100%"
+  },
+  {
+    "id": 5728782,
+    "type": "Lesson",
+    "topicCourseId": 99,
+    "locked": null,
+    "importance": 2,
+    "reason": null,
+    "progress": 1,
+    "points": 10,
+    "pointsAwarded": 13,
+    "mp": null,
+    "mpAwarded": null,
+    "mpDecayRate": null,
+    "topic": {
+      "id": 5572,
+      "name": "Linear Equations With No Solutions",
+      "prerequisites": [
+        {
+          "id": 87,
+          "name": "Factoring Linear Expressions",
+          "urlSlug": "factoring-linear-expressions"
+        },
+        {
+          "id": 343,
+          "name": "Solving Linear Equations With Variables on Both Sides",
+          "urlSlug": "solving-linear-equations-with-variables-on-both-sides"
+        }
+      ],
+      "course": {
+        "id": 99,
+        "name": "Prealgebra"
+      }
+    },
+    "started": "2025-08-20T15:35:15.000Z",
+    "completed": "2025-08-20T15:51:42.000Z",
+    "timeCompletedStr": "3:51 PM",
+    "dateCompletedStr": "Wed, Aug 20th, 2025",
+    "test": {
+      "id": null,
+      "name": null,
+      "timeLimit": null,
+      "questionCount": null,
+      "course": {
+        "id": 99,
+        "name": "Prealgebra"
+      }
+    },
+    "progressStr": "100%"
+  },
+  {
+    "id": 5768753,
+    "type": "Lesson",
+    "topicCourseId": 99,
+    "locked": null,
+    "importance": 2,
+    "reason": null,
+    "progress": 1,
+    "points": 8,
+    "pointsAwarded": 10,
+    "mp": null,
+    "mpAwarded": null,
+    "mpDecayRate": null,
+    "topic": {
+      "id": 3043,
+      "name": "Comparing Data Sets Using Measures of Centrality",
+      "prerequisites": [
+        {
+          "id": 3579,
+          "name": "The Mode of a Data Set",
+          "urlSlug": "the-mode-of-a-data-set"
+        },
+        {
+          "id": 3749,
+          "name": "The Median of a Data Set",
+          "urlSlug": "the-median-of-a-data-set"
+        }
+      ],
+      "course": {
+        "id": 99,
+        "name": "Prealgebra"
+      }
+    },
+    "started": "2025-08-20T15:04:26.000Z",
+    "completed": "2025-08-20T15:24:49.000Z",
+    "timeCompletedStr": "3:24 PM",
+    "dateCompletedStr": "Wed, Aug 20th, 2025",
+    "test": {
+      "id": null,
+      "name": null,
+      "timeLimit": null,
+      "questionCount": null,
+      "course": {
+        "id": 99,
+        "name": "Prealgebra"
+      }
+    },
+    "progressStr": "100%"
+  },
+  {
+    "id": 5651326,
+    "type": "Lesson",
+    "topicCourseId": 99,
+    "locked": null,
+    "importance": 2,
+    "reason": null,
+    "progress": 1,
+    "points": 7,
+    "pointsAwarded": 7,
+    "mp": null,
+    "mpAwarded": null,
+    "mpDecayRate": null,
+    "topic": {
+      "id": 3731,
+      "name": "Problem Solving With Angles of Triangles",
+      "prerequisites": [
+        {
+          "id": 496,
+          "name": "Interior Angles of Triangles",
+          "urlSlug": "interior-angles-of-triangles"
+        },
+        {
+          "id": 521,
+          "name": "Segment Bisectors and the Perpendicular Bisector Theorem",
+          "urlSlug": "segment-bisectors-and-the-perpendicular-bisector-theorem"
+        },
+        {
+          "id": 4104,
+          "name": "Consecutive Angles",
+          "urlSlug": "consecutive-angles"
+        }
+      ],
+      "course": {
+        "id": 99,
+        "name": "Prealgebra"
+      }
+    },
+    "started": "2025-08-15T00:41:34.000Z",
+    "completed": "2025-08-19T22:25:50.000Z",
+    "timeCompletedStr": "10:25 PM",
+    "dateCompletedStr": "Tue, Aug 19th, 2025",
+    "test": {
+      "id": null,
+      "name": null,
+      "timeLimit": null,
+      "questionCount": null,
+      "course": {
+        "id": 99,
+        "name": "Prealgebra"
+      }
+    },
+    "progressStr": "100%"
+  },
+  {
+    "id": 5728781,
+    "type": "Multistep",
+    "topicCourseId": null,
+    "locked": null,
+    "importance": 3,
+    "reason": null,
+    "progress": 1,
+    "points": 10,
+    "pointsAwarded": 3,
+    "mp": null,
+    "mpAwarded": null,
+    "mpDecayRate": null,
+    "topic": {
+      "id": null,
+      "name": null,
+      "course": {
+        "id": null,
+        "name": null
+      }
+    },
+    "started": "2025-08-19T20:23:23.000Z",
+    "completed": "2025-08-19T22:07:58.000Z",
+    "timeCompletedStr": "10:07 PM",
+    "dateCompletedStr": "Tue, Aug 19th, 2025",
+    "test": {
+      "id": null,
+      "name": null,
+      "timeLimit": null,
+      "questionCount": null,
+      "course": {
+        "id": 99,
+        "name": "Prealgebra"
+      }
+    },
+    "multistep": {
+      "id": 1286,
+      "type": {
+        "id": 73,
+        "name": "Percentages and Decimals in Farming Contexts"
+      }
+    },
+    "progressStr": "100%"
+  },
+  {
+    "id": 5717480,
+    "type": "Review",
+    "topicCourseId": 99,
+    "locked": null,
+    "importance": 1,
+    "reason": "quizRepair",
+    "progress": 1,
+    "points": 4,
+    "pointsAwarded": 6,
+    "mp": null,
+    "mpAwarded": null,
+    "mpDecayRate": null,
+    "topic": {
+      "id": 1318,
+      "name": "Rationalizing Denominators",
+      "prerequisites": [
+        {
+          "id": 1927,
+          "name": "The Product Rule for Radicals",
+          "urlSlug": "the-product-rule-for-radicals"
+        }
+      ],
+      "course": {
+        "id": 99,
+        "name": "Prealgebra"
+      }
+    },
+    "started": "2025-08-16T01:23:29.000Z",
+    "completed": "2025-08-17T01:15:01.000Z",
+    "timeCompletedStr": "1:15 AM",
+    "dateCompletedStr": "Sun, Aug 17th, 2025",
+    "test": {
+      "id": null,
+      "name": null,
+      "timeLimit": null,
+      "questionCount": null,
+      "course": {
+        "id": 99,
+        "name": "Prealgebra"
+      }
+    },
+    "progressStr": "100%"
+  },
+  {
+    "id": 5717483,
+    "type": "Review",
+    "topicCourseId": 99,
+    "locked": null,
+    "importance": 1,
+    "reason": "quizRepair",
+    "progress": 1,
+    "points": 4,
+    "pointsAwarded": 6,
+    "mp": null,
+    "mpAwarded": null,
+    "mpDecayRate": null,
+    "topic": {
+      "id": 2552,
+      "name": "Understanding Proportional Relationships Using Graphs",
+      "prerequisites": [
+        {
+          "id": 92,
+          "name": "The Cartesian Coordinate System",
+          "urlSlug": "the-cartesian-coordinate-system"
+        },
+        {
+          "id": 561,
+          "name": "Graphing Ratios",
+          "urlSlug": "graphing-ratios"
+        },
+        {
+          "id": 2553,
+          "name": "Understanding Proportional Relationships Using Tables",
+          "urlSlug": "understanding-proportional-relationships-using-tables"
+        }
+      ],
+      "course": {
+        "id": 99,
+        "name": "Prealgebra"
+      }
+    },
+    "started": "2025-08-17T01:09:10.000Z",
+    "completed": "2025-08-17T01:11:36.000Z",
+    "timeCompletedStr": "1:11 AM",
+    "dateCompletedStr": "Sun, Aug 17th, 2025",
+    "test": {
+      "id": null,
+      "name": null,
+      "timeLimit": null,
+      "questionCount": null,
+      "course": {
+        "id": 99,
+        "name": "Prealgebra"
+      }
+    },
+    "progressStr": "100%"
+  },
+  {
+    "id": 5717481,
+    "type": "Review",
+    "topicCourseId": 99,
+    "locked": null,
+    "importance": 1,
+    "reason": "quizRepair",
+    "progress": 1,
+    "points": 4,
+    "pointsAwarded": 6,
+    "mp": null,
+    "mpAwarded": null,
+    "mpDecayRate": null,
+    "topic": {
+      "id": 85,
+      "name": "The Greatest Common Factor of Two Linear Expressions",
+      "prerequisites": [
+        {
+          "id": 811,
+          "name": "Finding Greatest Common Factors Using Prime Factorization",
+          "urlSlug": "finding-greatest-common-factors-using-prime-factorization"
+        },
+        {
+          "id": 3721,
+          "name": "Constructing Algebraic Expressions",
+          "urlSlug": "constructing-algebraic-expressions"
+        }
+      ],
+      "course": {
+        "id": 99,
+        "name": "Prealgebra"
+      }
+    },
+    "started": "2025-08-17T00:47:49.000Z",
+    "completed": "2025-08-17T01:09:00.000Z",
+    "timeCompletedStr": "1:09 AM",
+    "dateCompletedStr": "Sun, Aug 17th, 2025",
+    "test": {
+      "id": null,
+      "name": null,
+      "timeLimit": null,
+      "questionCount": null,
+      "course": {
+        "id": 99,
+        "name": "Prealgebra"
+      }
+    },
+    "progressStr": "100%"
+  },
+  {
+    "id": 5717482,
+    "type": "Review",
+    "topicCourseId": 99,
+    "locked": null,
+    "importance": 1,
+    "reason": "quizRepair",
+    "progress": 1,
+    "points": 4,
+    "pointsAwarded": 6,
+    "mp": null,
+    "mpAwarded": null,
+    "mpDecayRate": null,
+    "topic": {
+      "id": 3757,
+      "name": "Measuring Quartiles and IQR From Dot Plots",
+      "prerequisites": [
+        {
+          "id": 2480,
+          "name": "Range, Quartiles, and IQR",
+          "urlSlug": "range-quartiles-and-iqr"
+        },
+        {
+          "id": 2500,
+          "name": "Measuring Centrality From Dot Plots",
+          "urlSlug": "measuring-centrality-from-dot-plots"
+        }
+      ],
+      "course": {
+        "id": 99,
+        "name": "Prealgebra"
+      }
+    },
+    "started": "2025-08-16T01:23:45.000Z",
+    "completed": "2025-08-16T01:26:09.000Z",
+    "timeCompletedStr": "1:26 AM",
+    "dateCompletedStr": "Sat, Aug 16th, 2025",
+    "test": {
+      "id": null,
+      "name": null,
+      "timeLimit": null,
+      "questionCount": null,
+      "course": {
+        "id": 99,
+        "name": "Prealgebra"
+      }
+    },
+    "progressStr": "100%"
+  },
+  {
+    "id": 5717484,
+    "type": "Review",
+    "topicCourseId": 99,
+    "locked": null,
+    "importance": 1,
+    "reason": "quizRepair",
+    "progress": 1,
+    "points": 4,
+    "pointsAwarded": 6,
+    "mp": null,
+    "mpAwarded": null,
+    "mpDecayRate": null,
+    "topic": {
+      "id": 3873,
+      "name": "Simplifying Linear Expressions When a Group of Terms Is Subtracted",
+      "prerequisites": [
+        {
+          "id": 137,
+          "name": "Distributing the Negative Sign in a Linear Expression",
+          "urlSlug": "distributing-the-negative-sign-in-a-linear-expression"
+        },
+        {
+          "id": 138,
+          "name": "Simplifying Linear Expressions Using the Distributive Law",
+          "urlSlug": "simplifying-linear-expressions-using-the-distributive-law"
+        }
+      ],
+      "course": {
+        "id": 99,
+        "name": "Prealgebra"
+      }
+    },
+    "started": "2025-08-16T01:12:42.000Z",
+    "completed": "2025-08-16T01:23:15.000Z",
+    "timeCompletedStr": "1:23 AM",
+    "dateCompletedStr": "Sat, Aug 16th, 2025",
+    "test": {
+      "id": null,
+      "name": null,
+      "timeLimit": null,
+      "questionCount": null,
+      "course": {
+        "id": 99,
+        "name": "Prealgebra"
+      }
+    },
+    "progressStr": "100%"
+  },
+  {
+    "id": 5687155,
+    "type": "Quiz",
+    "topicCourseId": null,
+    "locked": 0,
+    "importance": 4,
+    "reason": null,
+    "progress": 1,
+    "points": 15,
+    "pointsAwarded": 9,
+    "mp": null,
+    "mpAwarded": null,
+    "mpDecayRate": null,
+    "topic": {
+      "id": null,
+      "name": null,
+      "course": {
+        "id": null,
+        "name": null
+      }
+    },
+    "started": "2025-08-16T01:01:15.000Z",
+    "completed": "2025-08-16T01:12:10.000Z",
+    "timeCompletedStr": "1:12 AM",
+    "dateCompletedStr": "Sat, Aug 16th, 2025",
+    "test": {
+      "id": 216271,
+      "name": "Quiz 14",
+      "timeLimit": 30,
+      "questionCount": 15,
+      "course": {
+        "id": 99,
+        "name": "Prealgebra"
+      }
+    },
+    "progressStr": "100%"
+  },
+  {
+    "id": 5535416,
+    "type": "Lesson",
+    "topicCourseId": 99,
+    "locked": null,
+    "importance": 2,
+    "reason": null,
+    "progress": 1,
+    "points": 7,
+    "pointsAwarded": 7,
+    "mp": null,
+    "mpAwarded": null,
+    "mpDecayRate": null,
+    "topic": {
+      "id": 1863,
+      "name": "Addition and Subtraction in Scientific Notation",
+      "prerequisites": [
+        {
+          "id": 1135,
+          "name": "Writing Numbers in Scientific Notation",
+          "urlSlug": "writing-numbers-in-scientific-notation"
+        },
+        {
+          "id": 2340,
+          "name": "Decimal Subtraction With Unequal Numbers of Decimals",
+          "urlSlug": "decimal-subtraction-with-unequal-numbers-of-decimals"
+        },
+        {
+          "id": 2441,
+          "name": "Factoring Numerical Expressions",
+          "urlSlug": "factoring-numerical-expressions"
+        }
+      ],
+      "course": {
+        "id": 99,
+        "name": "Prealgebra"
+      }
+    },
+    "started": "2025-08-11T16:41:26.000Z",
+    "completed": "2025-08-15T02:04:43.000Z",
+    "timeCompletedStr": "2:04 AM",
+    "dateCompletedStr": "Fri, Aug 15th, 2025",
+    "test": {
+      "id": null,
+      "name": null,
+      "timeLimit": null,
+      "questionCount": null,
+      "course": {
+        "id": 99,
+        "name": "Prealgebra"
+      }
+    },
+    "progressStr": "100%"
+  },
+  {
+    "id": 5687185,
+    "type": "Lesson",
+    "topicCourseId": 99,
+    "locked": 0,
+    "importance": 2,
+    "reason": null,
+    "progress": 1,
+    "points": 7,
+    "pointsAwarded": 9,
+    "mp": null,
+    "mpAwarded": null,
+    "mpDecayRate": null,
+    "topic": {
+      "id": 2502,
+      "name": "Symmetry, Skew, and Outliers",
+      "prerequisites": [
+        {
+          "id": 2501,
+          "name": "Measuring Range and MAD From Dot Plots",
+          "urlSlug": "measuring-range-and-mad-from-dot-plots"
+        },
+        {
+          "id": 2517,
+          "name": "Outliers",
+          "urlSlug": "outliers"
+        }
+      ],
+      "course": {
+        "id": 99,
+        "name": "Prealgebra"
+      }
+    },
+    "started": "2025-08-15T00:56:42.000Z",
+    "completed": "2025-08-15T01:54:51.000Z",
+    "timeCompletedStr": "1:54 AM",
+    "dateCompletedStr": "Fri, Aug 15th, 2025",
+    "test": {
+      "id": null,
+      "name": null,
+      "timeLimit": null,
+      "questionCount": null,
+      "course": {
+        "id": 99,
+        "name": "Prealgebra"
+      }
+    },
+    "progressStr": "100%"
+  },
+  {
+    "id": 5520063,
+    "type": "Lesson",
+    "topicCourseId": 99,
+    "locked": null,
+    "importance": 2,
+    "reason": null,
+    "progress": 1,
+    "points": 7,
+    "pointsAwarded": 7,
+    "mp": null,
+    "mpAwarded": null,
+    "mpDecayRate": null,
+    "topic": {
+      "id": 87,
+      "name": "Factoring Linear Expressions",
+      "prerequisites": [
+        {
+          "id": 85,
+          "name": "The Greatest Common Factor of Two Linear Expressions",
+          "urlSlug": "the-greatest-common-factor-of-two-linear-expressions"
+        },
+        {
+          "id": 137,
+          "name": "Distributing the Negative Sign in a Linear Expression",
+          "urlSlug": "distributing-the-negative-sign-in-a-linear-expression"
+        },
+        {
+          "id": 2441,
+          "name": "Factoring Numerical Expressions",
+          "urlSlug": "factoring-numerical-expressions"
+        }
+      ],
+      "course": {
+        "id": 99,
+        "name": "Prealgebra"
+      }
+    },
+    "started": "2025-08-04T18:02:36.000Z",
+    "completed": "2025-08-15T00:56:16.000Z",
+    "timeCompletedStr": "12:56 AM",
+    "dateCompletedStr": "Fri, Aug 15th, 2025",
+    "test": {
+      "id": null,
+      "name": null,
+      "timeLimit": null,
+      "questionCount": null,
+      "course": {
+        "id": 99,
+        "name": "Prealgebra"
+      }
+    },
+    "progressStr": "100%"
+  },
+  {
+    "id": 5665238,
+    "type": "Lesson",
+    "topicCourseId": 99,
+    "locked": null,
+    "importance": 2,
+    "reason": null,
+    "progress": 1,
+    "points": 7,
+    "pointsAwarded": 9,
+    "mp": null,
+    "mpAwarded": null,
+    "mpDecayRate": null,
+    "topic": {
+      "id": 2517,
+      "name": "Outliers",
+      "prerequisites": [
+        {
+          "id": 2478,
+          "name": "Introduction to Statistics",
+          "urlSlug": "introduction-to-statistics"
+        }
+      ],
+      "course": {
+        "id": 99,
+        "name": "Prealgebra"
+      }
+    },
+    "started": "2025-08-14T01:43:53.000Z",
+    "completed": "2025-08-14T01:45:27.000Z",
+    "timeCompletedStr": "1:45 AM",
+    "dateCompletedStr": "Thu, Aug 14th, 2025",
+    "test": {
+      "id": null,
+      "name": null,
+      "timeLimit": null,
+      "questionCount": null,
+      "course": {
+        "id": 99,
+        "name": "Prealgebra"
+      }
+    },
+    "progressStr": "100%"
+  },
+  {
+    "id": 5665043,
+    "type": "Lesson",
+    "topicCourseId": 99,
+    "locked": null,
+    "importance": 2,
+    "reason": null,
+    "progress": 1,
+    "points": 9,
+    "pointsAwarded": 11,
+    "mp": null,
+    "mpAwarded": null,
+    "mpDecayRate": null,
+    "topic": {
+      "id": 2551,
+      "name": "Solving Unit Rate Problems Using Ratios of Fractions",
+      "prerequisites": [
+        {
+          "id": 571,
+          "name": "Fraction Multiplication Number Sense",
+          "urlSlug": "fraction-multiplication-number-sense"
+        },
+        {
+          "id": 2550,
+          "name": "Calculating Unit Rates Associated With Ratios of Fractions",
+          "urlSlug": "calculating-unit-rates-associated-with-ratios-of-fractions"
+        }
+      ],
+      "course": {
+        "id": 99,
+        "name": "Prealgebra"
+      }
+    },
+    "started": "2025-08-14T01:32:15.000Z",
+    "completed": "2025-08-14T01:43:14.000Z",
+    "timeCompletedStr": "1:43 AM",
+    "dateCompletedStr": "Thu, Aug 14th, 2025",
+    "test": {
+      "id": null,
+      "name": null,
+      "timeLimit": null,
+      "questionCount": null,
+      "course": {
+        "id": 99,
+        "name": "Prealgebra"
+      }
+    },
+    "progressStr": "100%"
+  },
+  {
+    "id": 5651012,
+    "type": "Lesson",
+    "topicCourseId": 99,
+    "locked": 0,
+    "importance": 2,
+    "reason": null,
+    "progress": 1,
+    "points": 13,
+    "pointsAwarded": 16,
+    "mp": null,
+    "mpAwarded": null,
+    "mpDecayRate": null,
+    "topic": {
+      "id": 2498,
+      "name": "Comparing Data Sets Using Range and Quartiles",
+      "prerequisites": [
+        {
+          "id": 2482,
+          "name": "Box Plots",
+          "urlSlug": "box-plots"
+        },
+        {
+          "id": 2501,
+          "name": "Measuring Range and MAD From Dot Plots",
+          "urlSlug": "measuring-range-and-mad-from-dot-plots"
+        },
+        {
+          "id": 3757,
+          "name": "Measuring Quartiles and IQR From Dot Plots",
+          "urlSlug": "measuring-quartiles-and-iqr-from-dot-plots"
+        }
+      ],
+      "course": {
+        "id": 99,
+        "name": "Prealgebra"
+      }
+    },
+    "started": "2025-08-12T15:21:30.000Z",
+    "completed": "2025-08-12T15:45:56.000Z",
+    "timeCompletedStr": "3:45 PM",
+    "dateCompletedStr": "Tue, Aug 12th, 2025",
+    "test": {
+      "id": null,
+      "name": null,
+      "timeLimit": null,
+      "questionCount": null,
+      "course": {
+        "id": 99,
+        "name": "Prealgebra"
+      }
+    },
+    "progressStr": "100%"
+  },
+  {
+    "id": 5519856,
+    "type": "Lesson",
+    "topicCourseId": 99,
+    "locked": null,
+    "importance": 2,
+    "reason": null,
+    "progress": 1,
+    "points": 7,
+    "pointsAwarded": 9,
+    "mp": null,
+    "mpAwarded": null,
+    "mpDecayRate": null,
+    "topic": {
+      "id": 2550,
+      "name": "Calculating Unit Rates Associated With Ratios of Fractions",
+      "prerequisites": [
+        {
+          "id": 557,
+          "name": "Unit Rates",
+          "urlSlug": "unit-rates"
+        },
+        {
+          "id": 2382,
+          "name": "Dividing Fractions",
+          "urlSlug": "dividing-fractions"
+        }
+      ],
+      "course": {
+        "id": 99,
+        "name": "Prealgebra"
+      }
+    },
+    "started": "2025-08-12T15:19:17.000Z",
+    "completed": "2025-08-12T15:21:19.000Z",
+    "timeCompletedStr": "3:21 PM",
+    "dateCompletedStr": "Tue, Aug 12th, 2025",
+    "test": {
+      "id": null,
+      "name": null,
+      "timeLimit": null,
+      "questionCount": null,
+      "course": {
+        "id": 99,
+        "name": "Prealgebra"
+      }
+    },
+    "progressStr": "100%"
+  }
+]

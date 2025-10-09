@@ -1,0 +1,99 @@
+import type { Activity, CourseStats } from '@/types/mathacademy';
+
+function calculatePercentile(values: number[], percentile: number): number {
+  if (values.length === 0) return 0;
+  
+  const sorted = [...values].sort((a, b) => a - b);
+  const index = (percentile / 100) * (sorted.length - 1);
+  const lower = Math.floor(index);
+  const upper = Math.ceil(index);
+  const weight = index - lower;
+  
+  if (lower === upper) {
+    return sorted[lower];
+  }
+  
+  return sorted[lower] * (1 - weight) + sorted[upper] * weight;
+}
+
+interface ProcessedActivity {
+  courseName: string;
+  xpPerMinute: number;
+}
+
+export function generateStats(activities: Activity[]): CourseStats[] {
+  // Filter out activities where completed - started > 2 hours
+  const TWO_HOURS_MS = 2 * 60 * 60 * 1000;
+  
+  const processedActivities: ProcessedActivity[] = [];
+  
+  for (const activity of activities) {
+    const startedMs = Date.parse(activity.started);
+    const completedMs = Date.parse(activity.completed);
+    
+    if (!Number.isFinite(startedMs) || !Number.isFinite(completedMs)) {
+      continue;
+    }
+    
+    const durationMs = completedMs - startedMs;
+    
+    // Skip if duration > 2 hours or duration <= 0
+    if (durationMs > TWO_HOURS_MS || durationMs <= 0) {
+      continue;
+    }
+    
+    const durationMinutes = durationMs / (60 * 1000);
+    
+    // Get course name
+    const courseName = activity.topic?.course?.name || activity.test?.course?.name;
+    
+    if (!courseName) {
+      continue;
+    }
+    
+    // Calculate XP per minute
+    const xpPerMinute = activity.pointsAwarded / durationMinutes;
+    
+    processedActivities.push({
+      courseName,
+      xpPerMinute
+    });
+  }
+  
+  // Group by course
+  const byCourse = new Map<string, number[]>();
+  
+  for (const activity of processedActivities) {
+    if (!byCourse.has(activity.courseName)) {
+      byCourse.set(activity.courseName, []);
+    }
+    byCourse.get(activity.courseName)!.push(activity.xpPerMinute);
+  }
+  
+  // Calculate stats for each course
+  const stats: CourseStats[] = [];
+  
+  for (const [courseName, xpValues] of byCourse.entries()) {
+    const percentile25 = calculatePercentile(xpValues, 25);
+    const percentile50 = calculatePercentile(xpValues, 50);
+    const percentile75 = calculatePercentile(xpValues, 75);
+    
+    const countAboveOne = xpValues.filter(xp => xp >= 1).length;
+    const percentAboveOne = (countAboveOne / xpValues.length) * 100;
+    
+    stats.push({
+      courseName,
+      percentile25,
+      percentile50,
+      percentile75,
+      percentAboveOne,
+      activityCount: xpValues.length
+    });
+  }
+  
+  // Sort by course name
+  stats.sort((a, b) => a.courseName.localeCompare(b.courseName));
+  
+  return stats;
+}
+
