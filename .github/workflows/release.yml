@@ -1,0 +1,52 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"   # push tags like v1.2.3 to trigger
+
+jobs:
+  build-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # needed to publish the release
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: true
+
+      - name: Build
+        run: pnpm run build
+
+      # Package everything in .outputs into zips (if not already zipped)
+      - name: Package artifacts
+        run: |
+          mkdir -p dist
+          shopt -s nullglob
+          for d in .outputs/*; do
+            base="$(basename "$d")"
+            if [ -d "$d" ]; then
+              zip -r "dist/${base}.zip" "$d"
+            else
+              cp "$d" "dist/${base}"
+            fi
+          done
+
+      # Create a GitHub Release and upload files
+      - name: Publish Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/**
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
