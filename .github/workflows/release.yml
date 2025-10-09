@@ -40,7 +40,8 @@ jobs:
         run: |
           mkdir -p dist
           # Only package production builds (exclude dev builds)
-          for d in .output/chrome-mv3 .output/firefox-mv2; do
+          mv .output mathacademy-stats-extension
+          for d in mathacademy-stats-extension/chrome-mv3 mathacademy-stats-extension/firefox-mv2; do
             if [ -d "$d" ]; then
               base="$(basename "$d")"
               zip -r "dist/${base}.zip" "$d"
