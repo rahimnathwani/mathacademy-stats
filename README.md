@@ -13,35 +13,60 @@ A browser extension for Chrome and Firefox that helps you analyze your Math Acad
 
 ## Installation
 
-### For Chrome
+### 🚀 Quick Install (Recommended)
 
-1. Clone this repository
+**For most users, install from the latest release:**
+
+1. Go to the [Releases page](https://github.com/rahimnathwani/mathacademy-stats/releases)
+2. Download the zip file for your browser:
+   - **Chrome**: Download `chrome-mv3.zip`
+   - **Firefox**: Download `firefox-mv2.zip`
+3. Extract the zip file to a folder on your computer
+4. Follow the browser-specific installation steps below
+
+#### Chrome Installation
+1. Open Chrome and navigate to `chrome://extensions/`
+2. Enable "Developer mode" in the top right
+3. Click "Load unpacked" and select the extracted `chrome-mv3` folder
+
+#### Firefox Installation
+1. Open Firefox and navigate to `about:debugging#/runtime/this-firefox`
+2. Click "Load Temporary Add-on"
+3. Navigate to the extracted `firefox-mv2` folder and select the `manifest.json` file
+
+### 🔧 Build from Source (For Developers)
+
+**Only use this if you want to modify the extension or contribute to development:**
+
+1. Clone this repository:
+   ```bash
+   git clone https://github.com/rahimnathwani/mathacademy-stats.git
+   cd mathacademy-stats
+   ```
+
 2. Install dependencies:
    ```bash
    pnpm install
    ```
+
 3. Build the extension:
    ```bash
+   # For Chrome
    pnpm run build
-   ```
-4. Open Chrome and navigate to `chrome://extensions/`
-5. Enable "Developer mode" in the top right
-6. Click "Load unpacked" and select the `.output/chrome-mv3` directory
-
-### For Firefox
-
-1. Follow steps 1-2 above
-2. Build the Firefox version:
-   ```bash
+   
+   # For Firefox
    pnpm run build:firefox
    ```
-3. Open Firefox and navigate to `about:debugging#/runtime/this-firefox`
-4. Click "Load Temporary Add-on"
-5. Navigate to `.output/firefox-mv2` and select the `manifest.json` file
+
+4. Follow the browser-specific installation steps above, but use the `.output/chrome-mv3` or `.output/firefox-mv2` directories instead
 
 ## Development
 
-Start the development server:
+**This section is only for developers who want to modify the extension.**
+
+### Development Commands
+
+Start the development server with hot reload:
 
 ```bash
 # For Chrome
@@ -50,6 +75,15 @@ pnpm run dev
 # For Firefox
 pnpm run dev:firefox
 ```
+
+### Available Scripts
+
+- `pnpm run dev` - Start Chrome development server with hot reload
+- `pnpm run dev:firefox` - Start Firefox development server with hot reload
+- `pnpm run build` - Build Chrome extension for production
+- `pnpm run build:firefox` - Build Firefox extension for production
+- `pnpm run zip` - Create zip file for Chrome extension
+- `pnpm run zip:firefox` - Create zip file for Firefox extension
 
 ## Usage
 
