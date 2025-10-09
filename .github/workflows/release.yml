@@ -26,22 +26,28 @@ jobs:
           version: 9
           run_install: true
 
-      - name: Build
+      - name: Clean previous builds
+        run: rm -rf .output
+
+      - name: Build Chrome Extension
         run: pnpm run build
 
-      # Package everything in .outputs into zips (if not already zipped)
+      - name: Build Firefox Extension
+        run: pnpm run build:firefox
+
+      # Package production builds into zips
       - name: Package artifacts
         run: |
           mkdir -p dist
-          shopt -s nullglob
-          for d in .outputs/*; do
-            base="$(basename "$d")"
+          # Only package production builds (exclude dev builds)
+          for d in .output/chrome-mv3 .output/firefox-mv2; do
             if [ -d "$d" ]; then
+              base="$(basename "$d")"
               zip -r "dist/${base}.zip" "$d"
-            else
-              cp "$d" "dist/${base}"
+              echo "Created ${base}.zip"
             fi
           done
+          ls -la dist/
 
       # Create a GitHub Release and upload files
       - name: Publish Release
