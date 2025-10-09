@@ -1,12 +1,34 @@
 import type { Activity } from '@/types/mathacademy';
 
-const BASE_URL = "https://mathacademy.com/api/previous-tasks/";
 const MAX_PAGES = 200;
 const SLEEP_MS = 200;
 const OVERLAP_DAYS = 1000;
 const VERBOSE = true;
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+// Detect the current Math Academy hostname from the active tab
+async function getMathAcademyHostname(): Promise<string> {
+  try {
+    const tabs = await browser.tabs.query({ active: true, currentWindow: true });
+    const currentUrl = tabs[0]?.url;
+    
+    if (currentUrl) {
+      const url = new URL(currentUrl);
+      const hostname = url.hostname;
+      
+      // Check if we're on mathacademy.com or www.mathacademy.com
+      if (hostname === 'mathacademy.com' || hostname === 'www.mathacademy.com') {
+        return hostname;
+      }
+    }
+  } catch (err) {
+    console.warn('Failed to detect hostname from active tab:', err);
+  }
+  
+  // Default to mathacademy.com if detection fails
+  return 'mathacademy.com';
+}
 
 // Force the path to look like PST format with -0800 offset
 function toPSTPathString(d: Date): string {
@@ -43,8 +65,8 @@ function getItemTimeMs(item: Activity): number | undefined {
   return undefined;
 }
 
-async function fetchPage(cutoff: Date): Promise<Activity[]> {
-  const url = BASE_URL + enc(cutoff);
+async function fetchPage(baseUrl: string, cutoff: Date): Promise<Activity[]> {
+  const url = baseUrl + enc(cutoff);
   if (VERBOSE) console.log("GET", url);
   
   let response;
@@ -79,6 +101,13 @@ async function fetchPage(cutoff: Date): Promise<Activity[]> {
 export async function fetchAllActivities(
   onProgress?: (message: string) => void
 ): Promise<Activity[]> {
+  // Detect the current hostname and build the base URL
+  const hostname = await getMathAcademyHostname();
+  const BASE_URL = `https://${hostname}/api/previous-tasks/`;
+  
+  if (VERBOSE) console.log(`Using API base URL: ${BASE_URL}`);
+  onProgress?.(`Detected hostname: ${hostname}`);
+  
   // Set window: last 3 years to now
   const WINDOW_END = new Date();
   const WINDOW_START = new Date(Date.now() - 3 * 365 * 24 * 60 * 60 * 1000);
@@ -103,7 +132,7 @@ export async function fetchAllActivities(
   onProgress?.(`Starting fetch from ${cursor.toISOString()}...`);
   
   while (pages < MAX_PAGES) {
-    const page = await fetchPage(cursor);
+    const page = await fetchPage(BASE_URL, cursor);
     if (VERBOSE) console.log(`Page ${pages + 1}: received ${page.length} items`);
     onProgress?.(`Page ${pages + 1}: received ${page.length} items. Total: ${all.length}`);
     

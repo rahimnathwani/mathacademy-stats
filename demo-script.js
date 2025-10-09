@@ -6,7 +6,8 @@ const WINDOW_END_LOCAL = new Date().toISOString().slice(0, 19);
 
 const WINDOW_START_LOCAL = new Date(Date.now() - 3 * 365 * 24 * 60 * 60 * 1000).toISOString().slice(0, 19);
 
-const BASE = "https://mathacademy.com/api/previous-tasks/";
+// Detect the current hostname (mathacademy.com or www.mathacademy.com)
+const BASE = `https://${window.location.hostname}/api/previous-tasks/`;
 
 const MAX_PAGES = 200; // big safety cap
 

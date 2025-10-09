@@ -53,9 +53,9 @@ pnpm run dev:firefox
 
 ## Usage
 
-1. Make sure you're logged into Math Academy (https://www.mathacademy.com)
+1. Make sure you're logged into Math Academy (https://mathacademy.com or https://www.mathacademy.com)
 2. Click the extension icon to open the popup
-3. Click "Get Activity Data" to fetch all your activities (this may take a few moments)
+3. Click "Get Activity Data" to fetch all your activities (this may take a few moments - the extension automatically detects which hostname you're using)
 4. Once data is loaded, you can:
    - **Download JSON**: Get all your activity data in JSON format
    - **Download CSV**: Export data to CSV with these fields:
@@ -86,8 +86,8 @@ Built with:
 
 The extension requires:
 - `storage`: To temporarily store statistics between popup and stats page
-- `tabs`: To open the statistics page in a new tab
-- `https://www.mathacademy.com/*`: To fetch your activity data from the Math Academy API
+- `tabs`: To open the statistics page in a new tab and detect the current Math Academy hostname
+- `https://mathacademy.com/*` and `https://www.mathacademy.com/*`: To fetch your activity data from the Math Academy API (automatically detects which hostname you're using)
 
 ## License
 
