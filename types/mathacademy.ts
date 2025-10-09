@@ -64,5 +64,8 @@ export interface CourseStats {
   percentile75: number;
   percentAboveOne: number;
   activityCount: number;
+  thresholdPercentages: {
+    [threshold: number]: number;
+  };
 }
 

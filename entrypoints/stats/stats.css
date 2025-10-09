@@ -35,6 +35,29 @@ h1 {
   font-size: 14px;
 }
 
+.note-box {
+  background-color: #fff3cd;
+  border: 1px solid #ffc107;
+  border-left: 4px solid #ff9800;
+  padding: 15px;
+  margin: 20px 0;
+  border-radius: 4px;
+  color: #856404;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.note-box strong {
+  color: #d97706;
+}
+
+h2.section-title {
+  color: #333;
+  margin-top: 40px;
+  margin-bottom: 10px;
+  font-size: 22px;
+}
+
 .error {
   color: #d32f2f;
   font-size: 16px;
@@ -92,6 +115,20 @@ h1 {
   color: #388e3c;
 }
 
+.threshold-table th {
+  text-align: center;
+  min-width: 80px;
+}
+
+.threshold-table td.percent {
+  text-align: center;
+}
+
+.threshold-table .course-name {
+  text-align: left;
+  min-width: 200px;
+}
+
 @media (max-width: 768px) {
   body {
     padding: 10px;
@@ -104,6 +141,16 @@ h1 {
   h1 {
     font-size: 22px;
   }
+
+  h2.section-title {
+    font-size: 18px;
+    margin-top: 30px;
+  }
+
+  .note-box {
+    font-size: 13px;
+    padding: 12px;
+  }
   
   .stats-table {
     font-size: 12px;
@@ -112,6 +159,19 @@ h1 {
   .stats-table th,
   .stats-table td {
     padding: 8px;
+  }
+
+  .threshold-table {
+    overflow-x: auto;
+    display: block;
+  }
+
+  .threshold-table th {
+    min-width: 60px;
+  }
+
+  .threshold-table .course-name {
+    min-width: 150px;
   }
 }
 

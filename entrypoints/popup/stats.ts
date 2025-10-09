@@ -73,6 +73,7 @@ export function generateStats(activities: Activity[]): CourseStats[] {
   
   // Calculate stats for each course
   const stats: CourseStats[] = [];
+  const thresholds = [0.75, 1.0, 1.25, 1.5, 1.75, 2.0];
   
   for (const [courseName, xpValues] of byCourse.entries()) {
     const percentile25 = calculatePercentile(xpValues, 25);
@@ -82,13 +83,21 @@ export function generateStats(activities: Activity[]): CourseStats[] {
     const countAboveOne = xpValues.filter(xp => xp >= 1).length;
     const percentAboveOne = (countAboveOne / xpValues.length) * 100;
     
+    // Calculate percentage of activities at or above each threshold
+    const thresholdPercentages: { [threshold: number]: number } = {};
+    for (const threshold of thresholds) {
+      const countAboveThreshold = xpValues.filter(xp => xp >= threshold).length;
+      thresholdPercentages[threshold] = (countAboveThreshold / xpValues.length) * 100;
+    }
+    
     stats.push({
       courseName,
       percentile25,
       percentile50,
       percentile75,
       percentAboveOne,
-      activityCount: xpValues.length
+      activityCount: xpValues.length,
+      thresholdPercentages
     });
   }
   
