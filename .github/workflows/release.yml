@@ -44,7 +44,7 @@ jobs:
           for d in mathacademy-stats-extension/chrome-mv3 mathacademy-stats-extension/firefox-mv2; do
             if [ -d "$d" ]; then
               base="$(basename "$d")"
-              zip -r "dist/${base}.zip" "$d"
+              zip -r "dist/mathacademy-stats-${base}.zip" "$d"
               echo "Created ${base}.zip"
             fi
           done
