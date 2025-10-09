@@ -44,8 +44,9 @@ export function generateStats(activities: Activity[]): CourseStats[] {
     
     const durationMinutes = durationMs / (60 * 1000);
     
-    // Get course name
-    const courseName = activity.topic?.course?.name || activity.test?.course?.name;
+    // Using the course the user was in when they did the activity,
+    // even if it was a review of material from a different (prior) course.
+    const courseName = activity.test?.course?.name; 
     
     if (!courseName) {
       continue;
