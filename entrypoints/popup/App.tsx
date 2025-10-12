@@ -54,15 +54,9 @@ function App() {
         activitiesData: activities 
       });
       
-      // Open stats page in new tab
-      // Cross-browser compatible URL construction
-      const manifest = browser.runtime.getManifest();
-      const extensionId = browser.runtime.id;
-      
-      // Firefox uses moz-extension://, Chrome uses chrome-extension://
-      const protocol = manifest.browser_specific_settings?.gecko ? 'moz-extension' : 'chrome-extension';
-      const statsUrl = `${protocol}://${extensionId}/stats.html`;
-      
+      // Open stats page in new tab using runtime URL helper
+      const statsUrl = browser.runtime.getURL('/stats.html');
+
       browser.tabs.create({ url: statsUrl });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to generate stats');
