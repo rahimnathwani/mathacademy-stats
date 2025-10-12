@@ -54,7 +54,8 @@ function App() {
         activitiesData: activities 
       });
       
-      // Open stats page in new tab using runtime URL helper
+      // runtime.getURL resolves to the fully qualified chrome-extension:// URL
+      // for this extension, so we don't need to hardcode the scheme or ID.
       const statsUrl = browser.runtime.getURL('/stats.html');
 
       browser.tabs.create({ url: statsUrl });
