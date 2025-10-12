@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import './App.css';
-import { fetchAllActivities } from './fetchActivities';
+import { fetchAllActivities, getCachedActivities, clearActivityCache } from './fetchActivities';
 import { downloadJSON, downloadCSV } from './downloads';
 import { generateStats } from './stats';
 import type { Activity } from '@/types/mathacademy';
@@ -13,11 +13,19 @@ function App() {
 
   const hasData = activities.length > 0;
 
+  useEffect(() => {
+    const cached = getCachedActivities();
+    if (cached.length > 0) {
+      setActivities(cached);
+      setProgress(`Loaded ${cached.length} cached activities.`);
+    }
+  }, []);
+
   const handleGetData = async () => {
     setLoading(true);
     setError('');
     setProgress('Starting...');
-    
+
     try {
       const data = await fetchAllActivities((msg) => setProgress(msg));
       setActivities(data);
@@ -28,6 +36,13 @@ function App() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleClearCache = () => {
+    clearActivityCache();
+    setActivities([]);
+    setProgress('Cache cleared.');
+    setError('');
   };
 
   const handleDownloadJSON = () => {
@@ -74,16 +89,23 @@ function App() {
       <h1>Math Academy Stats</h1>
       
       <div className="button-group">
-        <button 
-          onClick={handleGetData} 
+        <button
+          onClick={handleGetData}
           disabled={loading}
           className="primary-button"
         >
           {loading ? 'Loading...' : 'Get Activity Data'}
         </button>
-        
-        <button 
-          onClick={handleDownloadJSON} 
+
+        <button
+          onClick={handleClearCache}
+          disabled={loading}
+        >
+          Clear Cache
+        </button>
+
+        <button
+          onClick={handleDownloadJSON}
           disabled={!hasData || loading}
         >
           Download JSON

@@ -4,6 +4,65 @@ const MAX_PAGES = 200;
 const SLEEP_MS = 200;
 const OVERLAP_DAYS = 1000;
 const VERBOSE = true;
+const CACHE_KEY = 'mathacademyActivitiesCache';
+
+type CachePayload = {
+  items: Activity[];
+  updatedAt: string;
+};
+
+const hasLocalStorage = () => typeof localStorage !== 'undefined';
+
+function readCache(): Activity[] {
+  if (!hasLocalStorage()) return [];
+
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return [];
+
+    const parsed = JSON.parse(raw) as CachePayload | Activity[];
+    if (Array.isArray(parsed)) {
+      return parsed;
+    }
+
+    if (parsed && Array.isArray(parsed.items)) {
+      return parsed.items;
+    }
+  } catch (err) {
+    console.warn('Failed to read cached activities:', err);
+  }
+
+  return [];
+}
+
+function writeCache(items: Activity[]): void {
+  if (!hasLocalStorage()) return;
+
+  try {
+    const payload: CachePayload = {
+      items,
+      updatedAt: new Date().toISOString()
+    };
+    localStorage.setItem(CACHE_KEY, JSON.stringify(payload));
+  } catch (err) {
+    console.warn('Failed to write cached activities:', err);
+  }
+}
+
+export function getCachedActivities(): Activity[] {
+  const cached = readCache();
+  return sortActivities([...cached]);
+}
+
+export function clearActivityCache(): void {
+  if (!hasLocalStorage()) return;
+
+  try {
+    localStorage.removeItem(CACHE_KEY);
+  } catch (err) {
+    console.warn('Failed to clear cached activities:', err);
+  }
+}
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -44,7 +103,7 @@ const enc = (d: Date) => encodeURIComponent(toPSTPathString(d));
 // Extract timestamp from activity item
 function getItemTimeMs(item: Activity): number | undefined {
   const candidate = item?.completed;
-  
+
   if (!candidate) return undefined;
   
   if (typeof candidate === "number" && Number.isFinite(candidate)) {
@@ -63,6 +122,15 @@ function getItemTimeMs(item: Activity): number | undefined {
   }
   
   return undefined;
+}
+
+const bestTime = (item: Activity) => {
+  const t = getItemTimeMs(item);
+  return typeof t === 'number' ? t : -Infinity;
+};
+
+function sortActivities(items: Activity[]): Activity[] {
+  return items.sort((a, b) => bestTime(b) - bestTime(a));
 }
 
 async function fetchPage(baseUrl: string, cutoff: Date): Promise<Activity[]> {
@@ -104,24 +172,26 @@ export async function fetchAllActivities(
   // Detect the current hostname and build the base URL
   const hostname = await getMathAcademyHostname();
   const BASE_URL = `https://${hostname}/api/previous-tasks/`;
-  
+
   if (VERBOSE) console.log(`Using API base URL: ${BASE_URL}`);
   onProgress?.(`Detected hostname: ${hostname}`);
+
+  const cachedActivities = getCachedActivities();
+  if (cachedActivities.length > 0) {
+    onProgress?.(`Loaded ${cachedActivities.length} cached activities.`);
+  }
   
   // Set window: last 3 years to now
   const WINDOW_END = new Date();
   const WINDOW_START = new Date(Date.now() - 3 * 365 * 24 * 60 * 60 * 1000);
   
-  const all: Activity[] = [];
+  const newActivities: Activity[] = [];
   const seen = new Set<number>();
-  
-  function addUnique(items: Activity[]) {
-    for (const item of items) {
-      const id = item?.id;
-      if (id && !seen.has(id)) {
-        seen.add(id);
-        all.push(item);
-      }
+
+  for (const item of cachedActivities) {
+    const id = item?.id;
+    if (typeof id === 'number') {
+      seen.add(id);
     }
   }
   
@@ -131,15 +201,17 @@ export async function fetchAllActivities(
   
   onProgress?.(`Starting fetch from ${cursor.toISOString()}...`);
   
-  while (pages < MAX_PAGES) {
+  let encounteredCachedItem = false;
+
+  while (pages < MAX_PAGES && !encounteredCachedItem) {
     const page = await fetchPage(BASE_URL, cursor);
     if (VERBOSE) console.log(`Page ${pages + 1}: received ${page.length} items`);
-    onProgress?.(`Page ${pages + 1}: received ${page.length} items. Total: ${all.length}`);
-    
+    onProgress?.(`Page ${pages + 1}: received ${page.length} items. Total new: ${newActivities.length}`);
+
     if (page.length === 0) {
       if (VERBOSE) console.log(`Empty page — stepping back ${OVERLAP_DAYS} days`);
       cursor = new Date(cursor.getTime() - OVERLAP_DAYS * 86400_000);
-      
+
       if (cursor < WINDOW_START) break;
       if (cursor.getTime() === lastCursorMs) break;
       
@@ -148,8 +220,31 @@ export async function fetchAllActivities(
       continue;
     }
     
-    addUnique(page);
-    
+    const freshItems: Activity[] = [];
+
+    for (const item of page) {
+      const id = item?.id;
+      if (typeof id === 'number' && seen.has(id)) {
+        encounteredCachedItem = true;
+        onProgress?.('Encountered cached activity; stopping fetch.');
+        break;
+      }
+
+      if (typeof id === 'number') {
+        seen.add(id);
+      }
+
+      freshItems.push(item);
+    }
+
+    if (freshItems.length > 0) {
+      newActivities.push(...freshItems);
+    }
+
+    if (encounteredCachedItem) {
+      break;
+    }
+
     // Determine next cursor
     const times = page.map(getItemTimeMs).filter(t => typeof t === "number" && Number.isFinite(t)) as number[];
     
@@ -170,8 +265,8 @@ export async function fetchAllActivities(
     }
     
     pages++;
-    if (VERBOSE) console.log(`Total collected: ${all.length}. Next cursor: ${cursor.toString()}`);
-    
+    if (VERBOSE) console.log(`Total new collected: ${newActivities.length}. Next cursor: ${cursor.toString()}`);
+
     if (cursor < WINDOW_START) {
       if (VERBOSE) console.log("Crossed WINDOW_START; finishing pagination.");
       break;
@@ -187,21 +282,20 @@ export async function fetchAllActivities(
   }
   
   // Filter to window
-  const inWindow = all.filter(item => {
+  const combined = [...newActivities, ...cachedActivities];
+
+  const inWindow = combined.filter(item => {
     const t = getItemTimeMs(item);
     if (t === undefined) return true;
     return t >= WINDOW_START.getTime() && t <= WINDOW_END.getTime();
   });
-  
-  // Sort by completion time descending
-  const bestTime = (item: Activity) => {
-    const t = getItemTimeMs(item);
-    return typeof t === "number" ? t : -Infinity;
-  };
-  inWindow.sort((a, b) => bestTime(b) - bestTime(a));
-  
+
+  sortActivities(inWindow);
+
+  writeCache(inWindow);
+
   onProgress?.(`Done! Collected ${inWindow.length} activities.`);
-  
+
   return inWindow;
 }
 
