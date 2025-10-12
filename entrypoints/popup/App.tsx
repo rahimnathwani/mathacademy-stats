@@ -69,15 +69,10 @@ function App() {
         activitiesData: activities 
       });
       
-      // Open stats page in new tab
-      // Cross-browser compatible URL construction
-      const manifest = browser.runtime.getManifest();
-      const extensionId = browser.runtime.id;
-      
-      // Firefox uses moz-extension://, Chrome uses chrome-extension://
-      const protocol = manifest.browser_specific_settings?.gecko ? 'moz-extension' : 'chrome-extension';
-      const statsUrl = `${protocol}://${extensionId}/stats.html`;
-      
+      // runtime.getURL resolves to the fully qualified chrome-extension:// URL
+      // for this extension, so we don't need to hardcode the scheme or ID.
+      const statsUrl = browser.runtime.getURL('/stats.html');
+
       browser.tabs.create({ url: statsUrl });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to generate stats');
