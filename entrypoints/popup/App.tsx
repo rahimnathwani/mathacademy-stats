@@ -79,6 +79,22 @@ function App() {
     }
   };
 
+  const handleGenerateOverview = async () => {
+    if (!hasData) return;
+    
+    try {
+      // Store activities in browser storage
+      await browser.storage.local.set({ 
+        activitiesData: activities 
+      });
+      
+      const overviewUrl = browser.runtime.getURL('/overview.html');
+      browser.tabs.create({ url: overviewUrl });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to generate overview');
+    }
+  };
+
   return (
     <div className="app">
       <h1>Math Academy Stats</h1>
@@ -118,6 +134,13 @@ function App() {
           disabled={!hasData || loading}
         >
           Generate Stats
+        </button>
+        
+        <button 
+          onClick={handleGenerateOverview} 
+          disabled={!hasData || loading}
+        >
+          Generate Overview
         </button>
       </div>
       

@@ -16,7 +16,8 @@
   },
   "dependencies": {
     "react": "^19.1.1",
-    "react-dom": "^19.1.1"
+    "react-dom": "^19.1.1",
+    "uplot": "^1.6.32"
   },
   "devDependencies": {
     "@types/react": "^19.1.12",
