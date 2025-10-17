@@ -214,6 +214,24 @@ export function getCurrentCourse(activities: Activity[]): string {
 }
 
 /**
+ * Abbreviate course names for display on charts
+ */
+function abbreviateCourseName(courseName: string): string {
+  let abbreviated = courseName;
+  
+  // Apply abbreviations in order
+  abbreviated = abbreviated.replace(/Mathematical Foundations/g, 'MF');
+  abbreviated = abbreviated.replace(/Mathematics for/g, 'M4');
+  abbreviated = abbreviated.replace(/Machine Learning/g, 'ML');
+  abbreviated = abbreviated.replace(/Grade Math/g, 'Grade');
+  abbreviated = abbreviated.replace(/Prealgebra/g, 'Prealg');
+  abbreviated = abbreviated.replace(/Algebra/g, 'Alg');
+  abbreviated = abbreviated.replace(/Integrated Math/g, 'IM');
+  
+  return abbreviated;
+}
+
+/**
  * Course transition point
  */
 export interface CourseTransition {
@@ -246,7 +264,7 @@ export function getCourseTransitions(activities: Activity[]): CourseTransition[]
         timestamp,
         fromCourse: currentCourse,
         toCourse: courseName,
-        label: `${currentCourse} → ${courseName}`,
+        label: `${abbreviateCourseName(currentCourse)} → ${abbreviateCourseName(courseName)}`,
       });
       currentCourse = courseName;
     } else if (courseName !== 'Unknown') {
