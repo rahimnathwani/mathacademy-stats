@@ -213,3 +213,47 @@ export function getCurrentCourse(activities: Activity[]): string {
   return sortedActivities[0]?.test?.course?.name || 'Unknown Course';
 }
 
+/**
+ * Course transition point
+ */
+export interface CourseTransition {
+  timestamp: number; // Unix timestamp in seconds
+  fromCourse: string;
+  toCourse: string;
+  label: string; // e.g., "MFII → MFIII"
+}
+
+/**
+ * Detect course transitions in activities
+ */
+export function getCourseTransitions(activities: Activity[]): CourseTransition[] {
+  if (activities.length === 0) return [];
+  
+  const sortedActivities = [...activities].sort((a, b) => 
+    new Date(a.completed).getTime() - new Date(b.completed).getTime()
+  );
+  
+  const transitions: CourseTransition[] = [];
+  let currentCourse = sortedActivities[0]?.test?.course?.name || 'Unknown';
+  
+  for (let i = 1; i < sortedActivities.length; i++) {
+    const activity = sortedActivities[i];
+    const courseName = activity.test?.course?.name || 'Unknown';
+    
+    if (courseName !== currentCourse && courseName !== 'Unknown' && currentCourse !== 'Unknown') {
+      const timestamp = new Date(activity.completed).getTime() / 1000;
+      transitions.push({
+        timestamp,
+        fromCourse: currentCourse,
+        toCourse: courseName,
+        label: `${currentCourse} → ${courseName}`,
+      });
+      currentCourse = courseName;
+    } else if (courseName !== 'Unknown') {
+      currentCourse = courseName;
+    }
+  }
+  
+  return transitions;
+}
+

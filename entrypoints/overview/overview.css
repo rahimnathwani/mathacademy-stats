@@ -24,6 +24,39 @@ body {
   font-family: Georgia, 'Times New Roman', serif;
 }
 
+.time-period-select {
+  font-size: 2.5rem;
+  font-weight: 400;
+  font-family: Georgia, 'Times New Roman', serif;
+  color: rgb(139, 92, 246);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid rgb(139, 92, 246);
+  padding: 0 8px 2px 8px;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.time-period-select:hover {
+  border-bottom-color: rgb(109, 62, 216);
+  color: rgb(109, 62, 216);
+}
+
+.time-period-select:focus {
+  border-bottom-color: rgb(109, 62, 216);
+  color: rgb(109, 62, 216);
+}
+
+.time-period-select option {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  font-size: 1rem;
+  background: white;
+  color: #333;
+}
+
 .current-course-section {
   background: white;
   border: 1px solid #e0e0e0;
@@ -87,7 +120,7 @@ body {
 
 .metric-chart {
   width: 100%;
-  height: 100px;
+  height: 140px;
   margin-top: 20px;
 }
 
@@ -152,6 +185,10 @@ body {
 
 @media (max-width: 640px) {
   .overview-title {
+    font-size: 1.75rem;
+  }
+
+  .time-period-select {
     font-size: 1.75rem;
   }
 
