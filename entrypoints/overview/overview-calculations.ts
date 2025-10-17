@@ -43,7 +43,9 @@ function isDiagnostic(activity: Activity): boolean {
   return !isQuiz && (
     type === 'diagnostic' || 
     type === 'assessment' || 
-    type === 'supplemental diagnostic'
+    type === 'supplemental diagnostic' ||
+    type === 'placement' ||
+    type === 'supplemental'
   );
 }
 
@@ -172,6 +174,8 @@ export function calculateActivityCounts(activities: Activity[]): ActivityCounts 
         case 'diagnostic':
         case 'assessment':
         case 'supplemental diagnostic':
+        case 'placement':
+        case 'supplemental':
           counts.diagnostics++;
           break;
         case 'lesson':
