@@ -109,7 +109,7 @@ function MetricCard({ label, value, chartData, color, courseTransitions }: Metri
 
                 // Draw label
                 ctx.save();
-                ctx.font = '10px sans-serif';
+                ctx.font = '12px sans-serif';
                 ctx.fillStyle = '#888';
                 ctx.textAlign = 'center';
                 ctx.fillText(transition.label, x, y0 - 2);
