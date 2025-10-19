@@ -69,3 +69,32 @@ export interface CourseStats {
   };
 }
 
+export interface FrontierTopic {
+  id: number;
+  name: string;
+  prerequisites?: number[];
+  frontier?: number | boolean | string;
+  repetitions?: number;
+  repetition?: number;
+}
+
+export interface KnowledgeGraphResponse {
+  topics: Record<string, FrontierTopic>;
+}
+
+export interface FrontierTopicStats {
+  min: number | null;
+  max: number | null;
+  median: number | null;
+  mean: number | null;
+}
+
+export interface EnrichedFrontierTopic {
+  topic: FrontierTopic;
+  prereqIds: number[];
+  prereqTopics: (FrontierTopic | null)[];
+  repVals: number[];
+  stats: FrontierTopicStats;
+  sortKey: number;
+}
+

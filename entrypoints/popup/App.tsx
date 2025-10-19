@@ -81,17 +81,26 @@ function App() {
 
   const handleGenerateOverview = async () => {
     if (!hasData) return;
-    
+
     try {
       // Store activities in browser storage
-      await browser.storage.local.set({ 
-        activitiesData: activities 
+      await browser.storage.local.set({
+        activitiesData: activities
       });
-      
+
       const overviewUrl = browser.runtime.getURL('/overview.html');
       browser.tabs.create({ url: overviewUrl });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to generate overview');
+    }
+  };
+
+  const handleTopicsComingSoon = async () => {
+    try {
+      const frontierUrl = browser.runtime.getURL('/frontier.html');
+      browser.tabs.create({ url: frontierUrl });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to open topics page');
     }
   };
 
@@ -136,11 +145,17 @@ function App() {
           Generate Stats
         </button>
         
-        <button 
-          onClick={handleGenerateOverview} 
+        <button
+          onClick={handleGenerateOverview}
           disabled={!hasData || loading}
         >
           Generate Overview
+        </button>
+
+        <button
+          onClick={handleTopicsComingSoon}
+        >
+          Topics Coming Soon
         </button>
       </div>
       
