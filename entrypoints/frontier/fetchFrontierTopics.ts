@@ -37,6 +37,8 @@ export async function fetchFrontierTopics(
 ): Promise<EnrichedFrontierTopic[]> {
   const endpoint = `https://www.mathacademy.com/api/courses/${courseId}/students/${studentId}/knowledge-graph`;
 
+  console.log('[Frontier] Fetching from:', endpoint);
+
   const res = await fetch(endpoint, {
     credentials: "include",
     headers: { "accept": "application/json" }
@@ -51,9 +53,14 @@ export async function fetchFrontierTopics(
   const topics = Object.values(topicsObj);
   const byId = new Map(topics.map(t => [Number(t.id), t]));
 
+  console.log('[Frontier] Total topics:', topics.length);
+  console.log('[Frontier] Sample frontier values:', topics.slice(0, 5).map(t => ({ name: t.name, frontier: t.frontier })));
+
   // Build enriched frontier topic records with stats over their prereqs' repetitions
-  const enriched: EnrichedFrontierTopic[] = topics
-    .filter(isFrontier)
+  const frontierTopics = topics.filter(isFrontier);
+  console.log('[Frontier] Frontier topics found:', frontierTopics.length);
+
+  const enriched: EnrichedFrontierTopic[] = frontierTopics
     .map(t => {
       const prereqIds = Array.isArray(t.prerequisites) ? t.prerequisites.map(Number) : [];
       const prereqTopics = prereqIds.map(id => byId.get(id) || null);

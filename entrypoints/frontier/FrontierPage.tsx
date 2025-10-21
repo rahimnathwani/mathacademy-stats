@@ -19,6 +19,8 @@ function FrontierPage() {
         // Get studentId and courseId from the Math Academy page
         const { studentId, courseId, error: idsError } = await getMathAcademyIds();
 
+        console.log('[Frontier] Got IDs:', { studentId, courseId, error: idsError });
+
         if (idsError || !studentId || !courseId) {
           throw new Error(
             idsError ||
@@ -27,8 +29,10 @@ function FrontierPage() {
         }
 
         const data = await fetchFrontierTopics(courseId, studentId);
+        console.log('[Frontier] Enriched topics:', data.length);
         setTopics(data);
       } catch (err) {
+        console.error('[Frontier] Error loading topics:', err);
         setError(err instanceof Error ? err.message : 'Failed to load frontier topics');
       } finally {
         setLoading(false);
