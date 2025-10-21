@@ -54,11 +54,22 @@ export async function fetchFrontierTopics(
   const byId = new Map(topics.map(t => [Number(t.id), t]));
 
   console.log('[Frontier] Total topics:', topics.length);
-  console.log('[Frontier] Sample frontier values:', topics.slice(0, 5).map(t => ({ name: t.name, frontier: t.frontier })));
+
+  // Get all unique frontier values to understand the data
+  const frontierValues = new Set(topics.map(t => t.frontier));
+  console.log('[Frontier] Unique frontier values in response:', Array.from(frontierValues));
+  console.log('[Frontier] Sample topics:', topics.slice(0, 5).map(t => ({ name: t.name, frontier: t.frontier })));
 
   // Build enriched frontier topic records with stats over their prereqs' repetitions
   const frontierTopics = topics.filter(isFrontier);
-  console.log('[Frontier] Frontier topics found:', frontierTopics.length);
+  console.log('[Frontier] Frontier topics found (frontier===1|true|"1"):', frontierTopics.length);
+
+  if (frontierTopics.length === 0 && topics.length > 0) {
+    console.warn('[Frontier] No topics matched the frontier filter. This might mean:');
+    console.warn('  1. All frontier topics have been unlocked already');
+    console.warn('  2. The frontier field uses different values than expected');
+    console.warn('  3. Check the "Unique frontier values" log above to see what values exist');
+  }
 
   const enriched: EnrichedFrontierTopic[] = frontierTopics
     .map(t => {

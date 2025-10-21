@@ -9,17 +9,20 @@ function FrontierPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expandedTopics, setExpandedTopics] = useState<Set<number>>(new Set());
+  const [debugInfo, setDebugInfo] = useState<string>('');
 
   useEffect(() => {
     const loadTopics = async () => {
       try {
         setLoading(true);
         setError(null);
+        setDebugInfo('Getting student and course IDs...');
 
         // Get studentId and courseId from the Math Academy page
         const { studentId, courseId, error: idsError } = await getMathAcademyIds();
 
         console.log('[Frontier] Got IDs:', { studentId, courseId, error: idsError });
+        setDebugInfo(`IDs: studentId=${studentId}, courseId=${courseId}`);
 
         if (idsError || !studentId || !courseId) {
           throw new Error(
@@ -28,12 +31,15 @@ function FrontierPage() {
           );
         }
 
+        setDebugInfo('Fetching knowledge graph from API...');
         const data = await fetchFrontierTopics(courseId, studentId);
         console.log('[Frontier] Enriched topics:', data.length);
+        setDebugInfo(`API returned ${data.length} frontier topics`);
         setTopics(data);
       } catch (err) {
         console.error('[Frontier] Error loading topics:', err);
         setError(err instanceof Error ? err.message : 'Failed to load frontier topics');
+        setDebugInfo('Error occurred: ' + (err instanceof Error ? err.message : String(err)));
       } finally {
         setLoading(false);
       }
@@ -85,6 +91,7 @@ function FrontierPage() {
           Frontier topics ordered by readiness (based on prerequisite repetitions)
         </p>
         <div className="topic-count">{topics.length} topics ready to unlock</div>
+        {debugInfo && <div className="debug-info" style={{ fontSize: '0.85em', color: '#666', marginTop: '8px' }}>{debugInfo}</div>}
       </header>
 
       <div className="topics-list">
