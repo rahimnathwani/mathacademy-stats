@@ -2,7 +2,7 @@
   "name": "mathacademy-stats",
   "description": "Browser extension for analyzing Math Academy activity data and statistics",
   "private": true,
-  "version": "1.0.5",
+  "version": "1.0.7",
   "type": "module",
   "scripts": {
     "dev": "wxt",
