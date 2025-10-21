@@ -33,9 +33,10 @@ const isFrontier = (t: FrontierTopic): boolean => {
 
 export async function fetchFrontierTopics(
   courseId: number,
-  studentId: number
+  studentId: number,
+  hostname: string = 'mathacademy.com'
 ): Promise<EnrichedFrontierTopic[]> {
-  const endpoint = `https://www.mathacademy.com/api/courses/${courseId}/students/${studentId}/knowledge-graph`;
+  const endpoint = `https://${hostname}/api/courses/${courseId}/students/${studentId}/knowledge-graph`;
 
   console.log('[Frontier] Fetching from:', endpoint);
 

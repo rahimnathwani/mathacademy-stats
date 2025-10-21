@@ -18,21 +18,21 @@ function FrontierPage() {
         setError(null);
         setDebugInfo('Getting student and course IDs...');
 
-        // Get studentId and courseId from the Math Academy page
-        const { studentId, courseId, error: idsError } = await getMathAcademyIds();
+        // Get studentId, courseId, and hostname from the Math Academy page
+        const { studentId, courseId, hostname, error: idsError } = await getMathAcademyIds();
 
-        console.log('[Frontier] Got IDs:', { studentId, courseId, error: idsError });
-        setDebugInfo(`IDs: studentId=${studentId}, courseId=${courseId}`);
+        console.log('[Frontier] Got IDs:', { studentId, courseId, hostname, error: idsError });
+        setDebugInfo(`IDs: studentId=${studentId}, courseId=${courseId}, hostname=${hostname}`);
 
-        if (idsError || !studentId || !courseId) {
+        if (idsError || !studentId || !courseId || !hostname) {
           throw new Error(
             idsError ||
             'Could not find studentId or courseId. Please make sure you have a Math Academy tab open and are logged in.'
           );
         }
 
-        setDebugInfo('Fetching knowledge graph from API...');
-        const data = await fetchFrontierTopics(courseId, studentId);
+        setDebugInfo(`Fetching knowledge graph from ${hostname}...`);
+        const data = await fetchFrontierTopics(courseId, studentId, hostname);
         console.log('[Frontier] Enriched topics:', data.length);
         setDebugInfo(`API returned ${data.length} frontier topics`);
         setTopics(data);

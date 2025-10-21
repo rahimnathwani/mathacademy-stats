@@ -1,6 +1,7 @@
 export interface MathAcademyIds {
   studentId: number | null;
   courseId: number | null;
+  hostname: string | null;
   error?: string;
 }
 
@@ -29,7 +30,7 @@ async function sendMessageWithRetry(
 }
 
 /**
- * Extracts studentId and courseId from the Math Academy page's window context
+ * Extracts studentId, courseId, and hostname from the Math Academy page's window context
  * by sending a message to the content script.
  */
 export async function getMathAcademyIds(): Promise<MathAcademyIds> {
@@ -47,16 +48,25 @@ export async function getMathAcademyIds(): Promise<MathAcademyIds> {
     let lastError: Error | null = null;
 
     for (const tab of allTabs) {
-      if (!tab.id) continue;
+      if (!tab.id || !tab.url) continue;
 
       try {
         const response = await sendMessageWithRetry(tab.id, {
           type: 'GET_MATH_ACADEMY_IDS'
         });
 
-        // If we got valid IDs, return them
+        // If we got valid IDs, return them with the hostname
         if (response && (response.studentId || response.courseId)) {
-          return response;
+          // Extract hostname from the tab URL
+          const url = new URL(tab.url);
+          const hostname = url.hostname;
+
+          return {
+            ...response,
+            hostname: (hostname === 'mathacademy.com' || hostname === 'www.mathacademy.com')
+              ? hostname
+              : 'mathacademy.com'
+          };
         }
       } catch (err) {
         lastError = err instanceof Error ? err : new Error(String(err));
@@ -79,6 +89,7 @@ export async function getMathAcademyIds(): Promise<MathAcademyIds> {
     return {
       studentId: null,
       courseId: null,
+      hostname: null,
       error: userMessage
     };
   }
