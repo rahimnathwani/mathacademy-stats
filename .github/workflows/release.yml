@@ -44,7 +44,8 @@ jobs:
           for d in mathacademy-stats-extension/chrome-mv3 mathacademy-stats-extension/firefox-mv2; do
             if [ -d "$d" ]; then
               base="$(basename "$d")"
-              zip -r "dist/${base}.zip" "$d"
+              # Zip the contents of the directory, not the directory itself
+              (cd "$d" && zip -r "../../dist/${base}.zip" .)
               echo "Created ${base}.zip"
             fi
           done
