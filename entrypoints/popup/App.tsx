@@ -104,6 +104,22 @@ function App() {
     }
   };
 
+  const handleGenerateHistograms = async () => {
+    if (!hasData) return;
+
+    try {
+      // Store activities in browser storage
+      await browser.storage.local.set({
+        activitiesData: activities
+      });
+
+      const histogramsUrl = browser.runtime.getURL('/histograms.html');
+      browser.tabs.create({ url: histogramsUrl });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to generate histograms');
+    }
+  };
+
   return (
     <div className="app">
       <h1>Math Academy Stats</h1>
@@ -150,6 +166,13 @@ function App() {
           disabled={!hasData || loading}
         >
           Generate Overview
+        </button>
+
+        <button
+          onClick={handleGenerateHistograms}
+          disabled={!hasData || loading}
+        >
+          View Histograms
         </button>
 
         <button
