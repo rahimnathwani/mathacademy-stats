@@ -200,10 +200,8 @@ export async function fetchAllActivities(
   let lastCursorMs = cursor.getTime();
   
   onProgress?.(`Starting fetch from ${cursor.toISOString()}...`);
-  
-  let encounteredCachedItem = false;
 
-  while (pages < MAX_PAGES && !encounteredCachedItem) {
+  while (pages < MAX_PAGES) {
     const page = await fetchPage(BASE_URL, cursor);
     if (VERBOSE) console.log(`Page ${pages + 1}: received ${page.length} items`);
     onProgress?.(`Page ${pages + 1}: received ${page.length} items. Total new: ${newActivities.length}`);
@@ -225,9 +223,8 @@ export async function fetchAllActivities(
     for (const item of page) {
       const id = item?.id;
       if (typeof id === 'number' && seen.has(id)) {
-        encounteredCachedItem = true;
-        onProgress?.('Encountered cached activity; stopping fetch.');
-        break;
+        // Skip duplicate item but don't stop pagination
+        continue;
       }
 
       if (typeof id === 'number') {
@@ -241,16 +238,12 @@ export async function fetchAllActivities(
       newActivities.push(...freshItems);
     }
 
-    if (encounteredCachedItem) {
-      break;
-    }
-
     // Determine next cursor
     const times = page.map(getItemTimeMs).filter(t => typeof t === "number" && Number.isFinite(t)) as number[];
     
     if (times.length > 0) {
       const oldest = Math.min(...times);
-      const nextMs = oldest - 0;
+      const nextMs = oldest - 60000; // Subtract 1 minute to ensure progress and avoid duplicates
       const next = new Date(nextMs);
       
       if (!(nextMs < lastCursorMs)) {
@@ -281,8 +274,26 @@ export async function fetchAllActivities(
     await sleep(SLEEP_MS);
   }
   
-  // Filter to window
-  const combined = [...newActivities, ...cachedActivities];
+  // Combine new and cached activities, ensuring no duplicates
+  const combined = [...newActivities];
+  const seenIds = new Set<number>();
+
+  // Add all new activity IDs to seen set
+  newActivities.forEach(item => {
+    if (typeof item.id === 'number') {
+      seenIds.add(item.id);
+    }
+  });
+
+  // Add cached activities that aren't already in new activities
+  for (const item of cachedActivities) {
+    if (typeof item.id !== 'number' || !seenIds.has(item.id)) {
+      combined.push(item);
+      if (typeof item.id === 'number') {
+        seenIds.add(item.id);
+      }
+    }
+  }
 
   const inWindow = combined.filter(item => {
     const t = getItemTimeMs(item);
