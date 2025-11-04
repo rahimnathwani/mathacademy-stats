@@ -250,7 +250,7 @@ export async function fetchAllActivities(
     
     if (times.length > 0) {
       const oldest = Math.min(...times);
-      const nextMs = oldest - 0;
+      const nextMs = oldest - 1; // Subtract 1ms to avoid re-fetching the last item
       const next = new Date(nextMs);
       
       if (!(nextMs < lastCursorMs)) {
