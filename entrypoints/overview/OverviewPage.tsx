@@ -271,6 +271,46 @@ export default function OverviewPage() {
   // Filter activities based on selected time period
   const filteredActivities = filterActivitiesByPeriod(activities, timePeriod);
 
+  // Calculate the start date for the selected time period
+  const getStartDateForPeriod = (period: TimePeriod): Date | undefined => {
+    if (period === 'all time') {
+      return undefined; // Use first activity date
+    }
+
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    let startDate: Date;
+
+    switch (period) {
+      case 'the past 7 days':
+        startDate = new Date(today);
+        startDate.setDate(today.getDate() - 6); // Last 7 days including today
+        return startDate;
+
+      case 'the past 30 days':
+        startDate = new Date(today);
+        startDate.setDate(today.getDate() - 29); // Last 30 days including today
+        return startDate;
+
+      case 'last month':
+        return new Date(now.getFullYear(), now.getMonth() - 1, 1);
+
+      case 'this month to date':
+        return new Date(now.getFullYear(), now.getMonth(), 1);
+
+      case 'last year':
+        return new Date(now.getFullYear() - 1, 0, 1);
+
+      case 'this year to date':
+        return new Date(now.getFullYear(), 0, 1);
+
+      default:
+        return undefined;
+    }
+  };
+
+  const chartStartDate = getStartDateForPeriod(timePeriod);
+
   // Calculate all metrics
   const totalXP = calculateTotalXP(filteredActivities);
   const totalActivities = filteredActivities.length;
@@ -280,17 +320,17 @@ export default function OverviewPage() {
   const currentCourse = getCurrentCourse(filteredActivities);
   const courseTransitions = getCourseTransitions(filteredActivities);
 
-  // Get chart data
-  const cumulativeXPData = getCumulativeXPData(filteredActivities);
-  const cumulativeActivitiesData = getCumulativeActivitiesData(filteredActivities);
+  // Get chart data with explicit start date
+  const cumulativeXPData = getCumulativeXPData(filteredActivities, chartStartDate);
+  const cumulativeActivitiesData = getCumulativeActivitiesData(filteredActivities, chartStartDate);
 
   // Use actual daily XP for short periods, rolling average for longer periods
   const useRollingAverage = timePeriod === 'all time' || timePeriod === 'last year' || timePeriod === 'this year to date';
   const avgXPOverTimeData = useRollingAverage
-    ? getAvgXPOverTimeData(filteredActivities)
-    : getDailyXPData(filteredActivities);
+    ? getAvgXPOverTimeData(filteredActivities, chartStartDate)
+    : getDailyXPData(filteredActivities, chartStartDate);
 
-  const successRateData = getSuccessRateOverTimeData(filteredActivities);
+  const successRateData = getSuccessRateOverTimeData(filteredActivities, chartStartDate);
 
   const formatNumber = (num: number) => {
     return num.toLocaleString('en-US');
