@@ -123,73 +123,97 @@ function App() {
   return (
     <div className="app">
       <h1>Math Academy Stats</h1>
-      
-      <div className="button-group">
-        <button
-          onClick={handleGetData}
-          disabled={loading}
-          className="primary-button"
-        >
-          {loading ? 'Loading...' : 'Get Activity Data'}
-        </button>
 
-        <button
-          onClick={handleClearCache}
-          disabled={loading}
-        >
-          Clear Cache
-        </button>
+      {!hasData && (
+        <div className="welcome-message">
+          <p>Welcome! Get started by fetching your activity data from Math Academy.</p>
+        </div>
+      )}
 
-        <button
-          onClick={handleDownloadJSON}
-          disabled={!hasData || loading}
-        >
-          Download JSON
-        </button>
-        
-        <button 
-          onClick={handleDownloadCSV} 
-          disabled={!hasData || loading}
-        >
-          Download CSV
-        </button>
-        
-        <button 
-          onClick={handleGenerateStats} 
-          disabled={!hasData || loading}
-        >
-          Generate Stats
-        </button>
-        
-        <button
-          onClick={handleGenerateOverview}
-          disabled={!hasData || loading}
-        >
-          Generate Overview
-        </button>
-
-        <button
-          onClick={handleGenerateHistograms}
-          disabled={!hasData || loading}
-        >
-          View Histograms
-        </button>
-
-        <button
-          onClick={handleTopicsComingSoon}
-        >
-          Topics Coming Soon
-        </button>
-      </div>
-      
-      {progress && <div className="progress">{progress}</div>}
-      {error && <div className="error">{error}</div>}
-      
       {hasData && (
         <div className="info">
           <p><strong>{activities.length}</strong> activities loaded</p>
         </div>
       )}
+
+      {progress && <div className="progress">{progress}</div>}
+      {error && <div className="error">{error}</div>}
+
+      <div className="section">
+        <h2 className="section-title">📊 View Reports</h2>
+        <div className="button-group">
+          <button
+            onClick={handleGenerateOverview}
+            disabled={!hasData || loading}
+            className="report-button"
+          >
+            <span className="button-label">Daily Overview</span>
+            <span className="button-description">Charts & activity timeline</span>
+          </button>
+
+          <button
+            onClick={handleGenerateStats}
+            disabled={!hasData || loading}
+            className="report-button"
+          >
+            <span className="button-label">XP/Minute Stats</span>
+            <span className="button-description">Performance by course</span>
+          </button>
+
+          <button
+            onClick={handleGenerateHistograms}
+            disabled={!hasData || loading}
+            className="report-button"
+          >
+            <span className="button-label">Performance Histograms</span>
+            <span className="button-description">XP/min distributions</span>
+          </button>
+        </div>
+      </div>
+
+      <div className="section">
+        <h2 className="section-title">💾 Data Management</h2>
+        <div className="button-group">
+          <button
+            onClick={handleGetData}
+            disabled={loading}
+            className="primary-button"
+          >
+            {loading ? 'Fetching...' : hasData ? 'Refresh Activity Data' : 'Fetch Activity Data'}
+          </button>
+
+          <button
+            onClick={handleClearCache}
+            disabled={loading}
+            className="secondary-button"
+          >
+            Clear Cached Data
+          </button>
+        </div>
+      </div>
+
+      <div className="section">
+        <h2 className="section-title">📥 Export</h2>
+        <div className="button-group">
+          <button
+            onClick={handleDownloadJSON}
+            disabled={!hasData || loading}
+            className="export-button"
+          >
+            <span className="button-label">Export as JSON</span>
+            <span className="button-description">For developers & analysis</span>
+          </button>
+
+          <button
+            onClick={handleDownloadCSV}
+            disabled={!hasData || loading}
+            className="export-button"
+          >
+            <span className="button-label">Export as CSV</span>
+            <span className="button-description">For Excel & spreadsheets</span>
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
