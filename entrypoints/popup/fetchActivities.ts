@@ -186,12 +186,12 @@ export async function fetchAllActivities(
   const WINDOW_START = new Date(Date.now() - 3 * 365 * 24 * 60 * 60 * 1000);
   
   const newActivities: Activity[] = [];
-  const seen = new Set<number>();
+  const cachedIds = new Set<number>();
 
   for (const item of cachedActivities) {
     const id = item?.id;
     if (typeof id === 'number') {
-      seen.add(id);
+      cachedIds.add(id);
     }
   }
   
@@ -224,14 +224,10 @@ export async function fetchAllActivities(
 
     for (const item of page) {
       const id = item?.id;
-      if (typeof id === 'number' && seen.has(id)) {
+      if (typeof id === 'number' && cachedIds.has(id)) {
         encounteredCachedItem = true;
         onProgress?.('Encountered cached activity; stopping fetch.');
         break;
-      }
-
-      if (typeof id === 'number') {
-        seen.add(id);
       }
 
       freshItems.push(item);
