@@ -15,6 +15,7 @@ import {
 import {
   getCumulativeXPData,
   getCumulativeActivitiesData,
+  getDailyXPData,
   getAvgXPOverTimeData,
   getSuccessRateOverTimeData,
 } from './chart-data';
@@ -282,7 +283,13 @@ export default function OverviewPage() {
   // Get chart data
   const cumulativeXPData = getCumulativeXPData(filteredActivities);
   const cumulativeActivitiesData = getCumulativeActivitiesData(filteredActivities);
-  const avgXPOverTimeData = getAvgXPOverTimeData(filteredActivities);
+
+  // Use actual daily XP for short periods, rolling average for longer periods
+  const useRollingAverage = timePeriod === 'all time' || timePeriod === 'last year' || timePeriod === 'this year to date';
+  const avgXPOverTimeData = useRollingAverage
+    ? getAvgXPOverTimeData(filteredActivities)
+    : getDailyXPData(filteredActivities);
+
   const successRateData = getSuccessRateOverTimeData(filteredActivities);
 
   const formatNumber = (num: number) => {

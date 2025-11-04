@@ -90,6 +90,44 @@ export function getCumulativeActivitiesData(activities: Activity[]): ChartData {
 }
 
 /**
+ * Get daily XP data (actual XP per day, not rolling average)
+ */
+export function getDailyXPData(activities: Activity[]): ChartData {
+  if (activities.length === 0) {
+    return { timestamps: [], values: [] };
+  }
+
+  const dailyData = groupActivitiesByDay(activities);
+
+  // Create complete date range from first to last activity day
+  const firstDate = new Date(dailyData[0].date);
+  const lastDate = new Date(dailyData[dailyData.length - 1].date);
+
+  // Create lookup for daily XP
+  const dailyXPLookup: { [key: string]: number } = {};
+  dailyData.forEach(day => {
+    dailyXPLookup[day.date] = day.xp;
+  });
+
+  // Generate data for ALL days (including zero-activity days)
+  const timestamps: number[] = [];
+  const values: number[] = [];
+  const currentDate = new Date(firstDate);
+
+  while (currentDate <= lastDate) {
+    const dateKey = toLocalDateString(currentDate);
+    const dayXP = dailyXPLookup[dateKey] || 0;
+
+    timestamps.push(currentDate.getTime() / 1000);
+    values.push(dayXP);
+
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+
+  return { timestamps, values };
+}
+
+/**
  * Get average XP per day over time (7-day rolling average)
  */
 export function getAvgXPOverTimeData(activities: Activity[]): ChartData {
@@ -98,23 +136,43 @@ export function getAvgXPOverTimeData(activities: Activity[]): ChartData {
   }
 
   const dailyData = groupActivitiesByDay(activities);
-  
-  // Calculate 7-day rolling average for each day
+
+  // Create complete date range from first to last activity day
+  const firstDate = new Date(dailyData[0].date);
+  const lastDate = new Date(dailyData[dailyData.length - 1].date);
+
+  // Create lookup for daily XP
+  const dailyXPLookup: { [key: string]: number } = {};
+  dailyData.forEach(day => {
+    dailyXPLookup[day.date] = day.xp;
+  });
+
+  // Generate all dates and calculate 7-day rolling average
   const timestamps: number[] = [];
   const values: number[] = [];
-  
-  for (let i = 0; i < dailyData.length; i++) {
+  const allDates: string[] = [];
+  const currentDate = new Date(firstDate);
+
+  // First, generate all dates and their XP values
+  while (currentDate <= lastDate) {
+    const dateKey = toLocalDateString(currentDate);
+    allDates.push(dateKey);
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+
+  // Calculate 7-day rolling average for each day (including zero-XP days)
+  for (let i = 0; i < allDates.length; i++) {
     const windowStart = Math.max(0, i - 6); // 7 days including current day
-    const window = dailyData.slice(windowStart, i + 1);
-    
-    const totalXP = window.reduce((sum, day) => sum + day.xp, 0);
+    const window = allDates.slice(windowStart, i + 1);
+
+    const totalXP = window.reduce((sum, dateKey) => sum + (dailyXPLookup[dateKey] || 0), 0);
     const rollingAvg = Math.round(totalXP / window.length);
-    
-    const date = new Date(dailyData[i].date);
+
+    const date = new Date(allDates[i]);
     timestamps.push(date.getTime() / 1000);
     values.push(rollingAvg);
   }
-  
+
   return { timestamps, values };
 }
 
