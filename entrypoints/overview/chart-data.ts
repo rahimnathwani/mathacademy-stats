@@ -18,10 +18,12 @@ export function getCumulativeXPData(activities: Activity[]): ChartData {
   }
 
   const dailyData = groupActivitiesByDay(activities);
-  
-  // Create complete date range from first to last activity day
+
+  // Create complete date range from first activity to today
   const firstDate = new Date(dailyData[0].date);
-  const lastDate = new Date(dailyData[dailyData.length - 1].date);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const lastDate = new Date(Math.max(new Date(dailyData[dailyData.length - 1].date).getTime(), today.getTime()));
   
   // Create lookup for daily XP
   const dailyXPLookup: { [key: string]: number } = {};
@@ -58,10 +60,12 @@ export function getCumulativeActivitiesData(activities: Activity[]): ChartData {
   }
 
   const dailyData = groupActivitiesByDay(activities);
-  
-  // Create complete date range from first to last activity day
+
+  // Create complete date range from first activity to today
   const firstDate = new Date(dailyData[0].date);
-  const lastDate = new Date(dailyData[dailyData.length - 1].date);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const lastDate = new Date(Math.max(new Date(dailyData[dailyData.length - 1].date).getTime(), today.getTime()));
   
   // Create lookup for daily activity count
   const dailyCountLookup: { [key: string]: number } = {};
@@ -99,9 +103,11 @@ export function getDailyXPData(activities: Activity[]): ChartData {
 
   const dailyData = groupActivitiesByDay(activities);
 
-  // Create complete date range from first to last activity day
+  // Create complete date range from first activity to today
   const firstDate = new Date(dailyData[0].date);
-  const lastDate = new Date(dailyData[dailyData.length - 1].date);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const lastDate = new Date(Math.max(new Date(dailyData[dailyData.length - 1].date).getTime(), today.getTime()));
 
   // Create lookup for daily XP
   const dailyXPLookup: { [key: string]: number } = {};
@@ -137,9 +143,11 @@ export function getAvgXPOverTimeData(activities: Activity[]): ChartData {
 
   const dailyData = groupActivitiesByDay(activities);
 
-  // Create complete date range from first to last activity day
+  // Create complete date range from first activity to today
   const firstDate = new Date(dailyData[0].date);
-  const lastDate = new Date(dailyData[dailyData.length - 1].date);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const lastDate = new Date(Math.max(new Date(dailyData[dailyData.length - 1].date).getTime(), today.getTime()));
 
   // Create lookup for daily XP
   const dailyXPLookup: { [key: string]: number } = {};
@@ -185,24 +193,55 @@ export function getSuccessRateOverTimeData(activities: Activity[]): ChartData {
   }
 
   const dailyData = groupActivitiesByDay(activities);
-  
-  // Calculate 7-day rolling attainment rate for each day
+
+  // Create complete date range from first activity to today
+  const firstDate = new Date(dailyData[0].date);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const lastDate = new Date(Math.max(new Date(dailyData[dailyData.length - 1].date).getTime(), today.getTime()));
+
+  // Create lookup for daily data
+  const dailyDataLookup: { [key: string]: DailyData } = {};
+  dailyData.forEach(day => {
+    dailyDataLookup[day.date] = day;
+  });
+
+  // Generate all dates
+  const allDates: string[] = [];
+  const currentDate = new Date(firstDate);
+
+  while (currentDate <= lastDate) {
+    const dateKey = toLocalDateString(currentDate);
+    allDates.push(dateKey);
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+
+  // Calculate 7-day rolling attainment rate for each day (including zero-activity days)
   const timestamps: number[] = [];
   const values: number[] = [];
-  
-  for (let i = 0; i < dailyData.length; i++) {
+
+  for (let i = 0; i < allDates.length; i++) {
     const windowStart = Math.max(0, i - 6); // 7 days including current day
-    const window = dailyData.slice(windowStart, i + 1);
-    
-    const totalEarned = window.reduce((sum, day) => sum + day.totalEarned, 0);
-    const totalPossible = window.reduce((sum, day) => sum + day.totalPossible, 0);
+    const window = allDates.slice(windowStart, i + 1);
+
+    let totalEarned = 0;
+    let totalPossible = 0;
+
+    window.forEach(dateKey => {
+      const dayData = dailyDataLookup[dateKey];
+      if (dayData) {
+        totalEarned += dayData.totalEarned;
+        totalPossible += dayData.totalPossible;
+      }
+    });
+
     const rollingAttainment = totalPossible > 0 ? Math.round((totalEarned / totalPossible) * 100) : 0;
-    
-    const date = new Date(dailyData[i].date);
+
+    const date = new Date(allDates[i]);
     timestamps.push(date.getTime() / 1000);
     values.push(rollingAttainment);
   }
-  
+
   return { timestamps, values };
 }
 
