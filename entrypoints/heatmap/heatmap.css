@@ -1,0 +1,203 @@
+.heatmap-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+}
+
+.heatmap-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.heatmap-header h1 {
+  font-size: 2.5em;
+  margin: 0 0 10px 0;
+  color: #24292e;
+}
+
+.heatmap-subtitle {
+  font-size: 1.1em;
+  color: #586069;
+  margin: 0;
+}
+
+.stats-summary {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin-bottom: 40px;
+  flex-wrap: wrap;
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 2em;
+  font-weight: bold;
+  color: #8b5cf6;
+  margin-bottom: 5px;
+}
+
+.stat-label {
+  font-size: 0.9em;
+  color: #586069;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.heatmap-wrapper {
+  background: white;
+  border-radius: 10px;
+  padding: 30px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.heatmap-grid-container {
+  overflow-x: auto;
+  margin-bottom: 20px;
+}
+
+.month-labels {
+  display: grid;
+  grid-template-columns: repeat(53, 15px);
+  gap: 3px;
+  margin-bottom: 5px;
+  margin-left: 35px;
+}
+
+.month-label {
+  font-size: 11px;
+  color: #586069;
+  font-weight: 500;
+}
+
+.heatmap-grid {
+  display: flex;
+  gap: 5px;
+}
+
+.weekday-labels {
+  display: grid;
+  grid-template-rows: repeat(7, 15px);
+  gap: 3px;
+  padding-right: 8px;
+  width: 27px;
+}
+
+.weekday-label {
+  font-size: 10px;
+  color: #586069;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  height: 15px;
+  line-height: 15px;
+}
+
+.days-grid {
+  display: grid;
+  grid-template-rows: repeat(7, 15px);
+  grid-template-columns: repeat(53, 15px);
+  gap: 3px;
+}
+
+.day-cell {
+  width: 15px;
+  height: 15px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+
+.day-cell:hover {
+  transform: scale(1.2);
+  z-index: 10;
+  position: relative;
+  outline: 2px solid rgba(0, 0, 0, 0.2);
+}
+
+.heatmap-legend {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  margin-top: 15px;
+}
+
+.legend-label {
+  font-size: 11px;
+  color: #586069;
+  margin: 0 5px;
+}
+
+.legend-box {
+  width: 15px;
+  height: 15px;
+  border-radius: 3px;
+}
+
+.tooltip {
+  position: fixed;
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  pointer-events: none;
+  z-index: 1000;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.tooltip-date {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.tooltip-xp {
+  color: #9be9a8;
+  font-weight: 500;
+}
+
+.tooltip-courses {
+  margin-top: 4px;
+  font-size: 11px;
+  color: #ddd;
+}
+
+.error {
+  color: #d73a49;
+  text-align: center;
+  padding: 20px;
+}
+
+@media (max-width: 768px) {
+  .heatmap-container {
+    padding: 20px 10px;
+  }
+
+  .heatmap-header h1 {
+    font-size: 1.8em;
+  }
+
+  .stats-summary {
+    gap: 20px;
+  }
+
+  .day-cell {
+    width: 12px;
+    height: 12px;
+  }
+
+  .days-grid {
+    grid-template-columns: repeat(53, 12px);
+    grid-template-rows: repeat(7, 12px);
+  }
+
+  .month-labels {
+    grid-template-columns: repeat(53, 12px);
+  }
+}

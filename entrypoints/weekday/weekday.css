@@ -1,0 +1,116 @@
+.weekday-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+}
+
+.weekday-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.weekday-header h1 {
+  font-size: 2.5em;
+  margin: 0 0 10px 0;
+  color: #24292e;
+}
+
+.weekday-subtitle {
+  font-size: 1.1em;
+  color: #586069;
+  margin: 0;
+}
+
+.chart-section {
+  margin-bottom: 40px;
+}
+
+.chart-wrapper {
+  background: white;
+  border-radius: 10px;
+  padding: 30px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.chart {
+  width: 100%;
+}
+
+.weekday-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.weekday-card {
+  background: white;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  gap: 15px;
+  align-items: flex-start;
+}
+
+.weekday-indicator {
+  width: 6px;
+  height: 100%;
+  min-height: 100px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.weekday-info {
+  flex: 1;
+}
+
+.weekday-name {
+  font-size: 1.4em;
+  font-weight: 600;
+  color: #24292e;
+  margin-bottom: 15px;
+}
+
+.weekday-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.weekday-stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.stat-label {
+  font-size: 0.95em;
+  color: #586069;
+}
+
+.stat-value {
+  font-size: 1.1em;
+  font-weight: 600;
+  color: #24292e;
+}
+
+.error {
+  color: #d73a49;
+  text-align: center;
+  padding: 20px;
+}
+
+@media (max-width: 768px) {
+  .weekday-container {
+    padding: 20px 10px;
+  }
+
+  .weekday-header h1 {
+    font-size: 1.8em;
+  }
+
+  .weekday-details {
+    grid-template-columns: 1fr;
+  }
+}

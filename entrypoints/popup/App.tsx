@@ -120,6 +120,66 @@ function App() {
     }
   };
 
+  const handleOpenDailyXP = async () => {
+    if (!hasData) return;
+
+    try {
+      await browser.storage.local.set({
+        activitiesData: activities
+      });
+
+      const dailyXPUrl = browser.runtime.getURL('/daily-xp.html');
+      browser.tabs.create({ url: dailyXPUrl });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to open Daily XP page');
+    }
+  };
+
+  const handleOpenHeatmap = async () => {
+    if (!hasData) return;
+
+    try {
+      await browser.storage.local.set({
+        activitiesData: activities
+      });
+
+      const heatmapUrl = browser.runtime.getURL('/heatmap.html');
+      browser.tabs.create({ url: heatmapUrl });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to open Heatmap page');
+    }
+  };
+
+  const handleOpenTaskTypes = async () => {
+    if (!hasData) return;
+
+    try {
+      await browser.storage.local.set({
+        activitiesData: activities
+      });
+
+      const taskTypesUrl = browser.runtime.getURL('/task-types.html');
+      browser.tabs.create({ url: taskTypesUrl });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to open Task Types page');
+    }
+  };
+
+  const handleOpenWeekday = async () => {
+    if (!hasData) return;
+
+    try {
+      await browser.storage.local.set({
+        activitiesData: activities
+      });
+
+      const weekdayUrl = browser.runtime.getURL('/weekday.html');
+      browser.tabs.create({ url: weekdayUrl });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to open Weekday page');
+    }
+  };
+
   return (
     <div className="app">
       <h1>Math Academy Stats</h1>
@@ -167,6 +227,42 @@ function App() {
           >
             <span className="button-label">Performance Histograms</span>
             <span className="button-description">XP/min distributions</span>
+          </button>
+
+          <button
+            onClick={handleOpenDailyXP}
+            disabled={!hasData || loading}
+            className="report-button"
+          >
+            <span className="button-label">Daily XP Distribution</span>
+            <span className="button-description">Histogram of daily XP totals</span>
+          </button>
+
+          <button
+            onClick={handleOpenHeatmap}
+            disabled={!hasData || loading}
+            className="report-button"
+          >
+            <span className="button-label">Activity Heatmap</span>
+            <span className="button-description">GitHub-style learning calendar</span>
+          </button>
+
+          <button
+            onClick={handleOpenTaskTypes}
+            disabled={!hasData || loading}
+            className="report-button"
+          >
+            <span className="button-label">Task Types Analysis</span>
+            <span className="button-description">Lessons, reviews, quizzes breakdown</span>
+          </button>
+
+          <button
+            onClick={handleOpenWeekday}
+            disabled={!hasData || loading}
+            className="report-button"
+          >
+            <span className="button-label">Weekday Patterns</span>
+            <span className="button-description">Activity by day of week</span>
           </button>
         </div>
       </div>
