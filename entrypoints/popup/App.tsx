@@ -264,6 +264,15 @@ function App() {
             <span className="button-label">Weekday Patterns</span>
             <span className="button-description">Activity by day of week</span>
           </button>
+
+          <button
+            onClick={handleTopicsComingSoon}
+            disabled={loading}
+            className="report-button"
+          >
+            <span className="button-label">Upcoming Topics</span>
+            <span className="button-description">Frontier topics by prerequisite strength</span>
+          </button>
         </div>
       </div>
 

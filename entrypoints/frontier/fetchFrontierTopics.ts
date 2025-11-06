@@ -16,6 +16,11 @@ const getReps = (obj: FrontierTopic | null): number | null => {
   return toNum(obj?.repetitions ?? obj?.repetition);
 };
 
+const getHalfLife = (obj: any | null): number | null => {
+  if (!obj || !('halfLife' in obj)) return null;
+  return toNum(obj.halfLife);
+};
+
 const median = (arr: number[]): number | null => {
   if (!arr.length) return null;
   const s = [...arr].sort((a, b) => a - b);
@@ -80,22 +85,30 @@ export async function fetchFrontierTopics(
         .map(p => getReps(p))
         .filter((v): v is number => v !== null);
 
+      const halfLifeVals = prereqTopics
+        .map(p => getHalfLife(p))
+        .filter((v): v is number => v !== null);
+
       const stats: FrontierTopicStats = {
         min: repVals.length ? Math.min(...repVals) : null,
         max: repVals.length ? Math.max(...repVals) : null,
         median: median(repVals),
-        mean: mean(repVals)
+        mean: mean(repVals),
+        halfLifeMin: halfLifeVals.length ? Math.min(...halfLifeVals) : null,
+        halfLifeMax: halfLifeVals.length ? Math.max(...halfLifeVals) : null,
+        halfLifeMedian: median(halfLifeVals),
+        halfLifeMean: mean(halfLifeVals)
       };
 
-      // Sort key = mean of (median, min)
-      const sortKey = (stats.median === null || stats.min === null)
+      // Sort key = mean of (halfLifeMedian, halfLifeMin) - higher half-life means more solid knowledge
+      const sortKey = (stats.halfLifeMedian === null || stats.halfLifeMin === null)
         ? -Infinity
-        : (stats.median + stats.min) / 2;
+        : (stats.halfLifeMedian + stats.halfLifeMin) / 2;
 
-      return { topic: t, prereqIds, prereqTopics, repVals, stats, sortKey };
+      return { topic: t, prereqIds, prereqTopics, repVals, halfLifeVals, stats, sortKey };
     });
 
-  // Order by sortKey descending
+  // Order by sortKey descending (higher half-life = more solid prerequisites)
   enriched.sort((a, b) => b.sortKey - a.sortKey);
 
   return enriched;

@@ -105,6 +105,20 @@
   flex-wrap: wrap;
 }
 
+.stat-group {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: baseline;
+}
+
+.stat-group-label {
+  font-size: 0.875rem;
+  color: #888;
+  font-weight: 500;
+  margin-right: 0.5rem;
+}
+
 .stat-item {
   display: flex;
   gap: 0.5rem;
@@ -173,7 +187,13 @@
   font-size: 0.95rem;
 }
 
-.prereq-reps {
+.prereq-stats {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.prereq-half-life {
   color: #4a90e2;
   font-weight: 600;
   font-size: 0.9rem;
@@ -181,6 +201,13 @@
   background-color: #e3f2fd;
   padding: 0.25rem 0.75rem;
   border-radius: 12px;
+}
+
+.prereq-reps {
+  color: #666;
+  font-weight: 500;
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
 }
 
 .no-prereqs {

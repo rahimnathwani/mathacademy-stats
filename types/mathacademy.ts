@@ -69,6 +69,38 @@ export interface CourseStats {
   };
 }
 
+export interface Unit {
+  id: number;
+  number: number;
+  name: string;
+}
+
+export interface Module {
+  id: number;
+  number: number;
+  name: string;
+}
+
+export interface KnowledgeGraphTopic {
+  id: number;
+  name: string;
+  depth: number | null;
+  numAncestors: number | null;
+  live: number;
+  unit: Unit;
+  module: Module;
+  course: Course;
+  prerequisites: number[];
+  frontier: number | boolean;
+  repetition: number;
+  halfLife: number;
+}
+
+export interface KnowledgeGraphResponse {
+  result: boolean;
+  topics: Record<string, KnowledgeGraphTopic>;
+}
+
 export interface FrontierTopic {
   id: number;
   name: string;
@@ -78,22 +110,23 @@ export interface FrontierTopic {
   repetition?: number;
 }
 
-export interface KnowledgeGraphResponse {
-  topics: Record<string, FrontierTopic>;
-}
-
 export interface FrontierTopicStats {
   min: number | null;
   max: number | null;
   median: number | null;
   mean: number | null;
+  halfLifeMin: number | null;
+  halfLifeMax: number | null;
+  halfLifeMedian: number | null;
+  halfLifeMean: number | null;
 }
 
 export interface EnrichedFrontierTopic {
-  topic: FrontierTopic;
+  topic: KnowledgeGraphTopic | FrontierTopic;
   prereqIds: number[];
-  prereqTopics: (FrontierTopic | null)[];
+  prereqTopics: (KnowledgeGraphTopic | FrontierTopic | null)[];
   repVals: number[];
+  halfLifeVals: number[];
   stats: FrontierTopicStats;
   sortKey: number;
 }
