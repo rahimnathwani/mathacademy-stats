@@ -22,5 +22,14 @@ export default defineConfig({
         world: 'MAIN' as any,
       },
     ],
+    browser_specific_settings: {
+      gecko: {
+        id: 'mathacademy-stats@rahim.dev',
+        data_collection_permissions: {
+          required: ['none'],
+          optional: [],
+        },
+      },
+    },
   },
 });
