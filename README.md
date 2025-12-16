@@ -13,9 +13,11 @@ A browser extension for Chrome and Firefox that helps you analyze your Math Acad
 
 ## Installation
 
-### 🚀 Install from Chrome web store (recommended)
+### 🚀 Install from browser web store (recommended)
 
-Go to [https://chromewebstore.google.com/detail/math-academy-stats/fkjemgghojefccgmlimnanhnofndckin](https://chromewebstore.google.com/detail/math-academy-stats/fkjemgghojefccgmlimnanhnofndckin)
+Chrome: [https://chromewebstore.google.com/detail/math-academy-stats/fkjemgghojefccgmlimnanhnofndckin](https://chromewebstore.google.com/detail/math-academy-stats/fkjemgghojefccgmlimnanhnofndckin)
+
+Firefox: [https://addons.mozilla.org/en-US/firefox/addon/math-academy-stats/](https://addons.mozilla.org/en-US/firefox/addon/math-academy-stats/)
 
 ### Quick Install latest release from GitHub
 
