@@ -1,4 +1,5 @@
 import { defineConfig } from 'wxt';
+import { MATH_ACADEMY_MATCHES } from './utils/constants';
 
 // See https://wxt.dev/api/config.html
 export default defineConfig({
@@ -8,27 +9,34 @@ export default defineConfig({
   }),
   manifest: {
     name: 'Math Academy Stats',
-    description: 'Analyze your Math Academy activity data with statistics, exports to JSON/CSV, and performance insights',
+    description:
+      'Analyze your Math Academy activity data with statistics, exports to JSON/CSV, and performance insights',
     permissions: ['storage', 'tabs', 'activeTab'],
     host_permissions: ['https://mathacademy.com/*', 'https://www.mathacademy.com/*'],
+    // WXT builds these entrypoints but does not register MAIN-world content
+    // scripts in the manifest, so both scripts are registered manually here.
     content_scripts: [
       {
-        matches: ['*://*.mathacademy.com/*', '*://mathacademy.com/*'],
+        matches: MATH_ACADEMY_MATCHES,
         js: ['content-isolated.js'],
       },
       {
-        matches: ['*://*.mathacademy.com/*', '*://mathacademy.com/*'],
+        matches: MATH_ACADEMY_MATCHES,
         js: ['content-main.js'],
-        world: 'MAIN' as any,
+        world: 'MAIN',
       },
     ],
     browser_specific_settings: {
       gecko: {
         id: 'mathacademy-stats@rahim.dev',
-        data_collection_permissions: {
-          required: ['none'],
-          optional: [],
-        },
+        // AMO requires this key; WXT's manifest types don't include it yet,
+        // and the spread-cast keeps the rest of the object type-checked.
+        ...({
+          data_collection_permissions: {
+            required: ['none'],
+            optional: [],
+          },
+        } as object),
       },
     },
   },

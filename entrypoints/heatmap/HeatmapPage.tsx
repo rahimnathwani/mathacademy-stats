@@ -1,5 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useMemo, useState } from 'react';
 import type { Activity } from '@/types/mathacademy';
+import { toLocalDateKey } from '@/utils/dates';
+import { useStoredActivities } from '@/hooks/useStoredActivities';
+import { PageStatus } from '@/components/PageStatus';
 
 interface DayData {
   date: Date;
@@ -26,13 +29,14 @@ function getColorForXP(xp: number): string {
 function calculateDailyXP(activities: Activity[]): Map<string, DayData> {
   const dailyMap = new Map<string, DayData>();
 
-  activities.forEach(activity => {
+  activities.forEach((activity) => {
     const date = new Date(activity.completed);
-    const dateKey = date.toISOString().split('T')[0];
+    const dateKey = toLocalDateKey(date);
 
     if (!dailyMap.has(dateKey)) {
       dailyMap.set(dateKey, {
-        date: new Date(dateKey),
+        // Local midnight, so weekday and tooltip dates match the user's timezone
+        date: new Date(date.getFullYear(), date.getMonth(), date.getDate()),
         xp: 0,
         weekday: date.getDay(),
         courseNames: new Set(),
@@ -53,14 +57,14 @@ function calculateHeatmapData(activities: Activity[]): { grid: DayData[][]; stat
   if (activities.length === 0) {
     return {
       grid: [],
-      stats: { totalActiveDays: 0, totalDays: 0, currentStreak: 0, maxDailyXP: 0, averageXP: 0 }
+      stats: { totalActiveDays: 0, totalDays: 0, currentStreak: 0, maxDailyXP: 0, averageXP: 0 },
     };
   }
 
   const dailyMap = calculateDailyXP(activities);
 
   // Get the last date and create 365-day range
-  const maxDate = new Date(Math.max(...Array.from(dailyMap.keys()).map(d => new Date(d).getTime())));
+  const maxDate = new Date(Math.max(...Array.from(dailyMap.values()).map((d) => d.date.getTime())));
   const endDate = new Date(maxDate);
   const startDate = new Date(endDate);
   startDate.setDate(startDate.getDate() - 364); // 365 days inclusive
@@ -77,41 +81,52 @@ function calculateHeatmapData(activities: Activity[]): { grid: DayData[][]; stat
   // Create grid data (7 rows x 53 columns)
   const grid: DayData[][] = Array.from({ length: 7 }, () => []);
 
-  let currentDate = new Date(alignedStartDate);
+  const currentDate = new Date(alignedStartDate);
   let weekIndex = 0;
 
   while (currentDate <= alignedEndDate && weekIndex < 53) {
     // Process one week at a time
     for (let day = 0; day < 7; day++) {
-      const dateKey = currentDate.toISOString().split('T')[0];
+      const dateKey = toLocalDateKey(currentDate);
       const dayData = dailyMap.get(dateKey);
 
-      grid[day].push(dayData || {
-        date: new Date(currentDate),
-        xp: 0,
-        weekday: currentDate.getDay(),
-        courseNames: new Set(),
-      });
+      grid[day].push(
+        dayData || {
+          date: new Date(currentDate),
+          xp: 0,
+          weekday: currentDate.getDay(),
+          courseNames: new Set(),
+        }
+      );
 
       currentDate.setDate(currentDate.getDate() + 1);
     }
     weekIndex++;
   }
 
-  // Calculate statistics
-  const allDays = grid.flat();
-  const activeDays = allDays.filter(d => d.xp > 0);
-  const totalActiveDays = activeDays.length;
-  const totalDays = allDays.length;
-  const maxDailyXP = Math.max(...allDays.map(d => d.xp), 0);
-  const averageXP = totalActiveDays > 0
-    ? activeDays.reduce((sum, d) => sum + d.xp, 0) / totalActiveDays
-    : 0;
+  // Calculate statistics over real days only (the grid is padded to full
+  // weeks, and grid.flat() is in weekday-row order, not chronological order)
+  const chronologicalDays: DayData[] = [];
+  for (let col = 0; col < grid[0].length; col++) {
+    for (let day = 0; day < 7; day++) {
+      const dayData = grid[day][col];
+      if (dayData.date >= startDate && dayData.date <= endDate) {
+        chronologicalDays.push(dayData);
+      }
+    }
+  }
 
-  // Calculate current streak from the end
+  const activeDays = chronologicalDays.filter((d) => d.xp > 0);
+  const totalActiveDays = activeDays.length;
+  const totalDays = chronologicalDays.length;
+  const maxDailyXP = Math.max(...chronologicalDays.map((d) => d.xp), 0);
+  const averageXP =
+    totalActiveDays > 0 ? activeDays.reduce((sum, d) => sum + d.xp, 0) / totalActiveDays : 0;
+
+  // Current streak: consecutive active days ending at the most recent active day
   let currentStreak = 0;
-  for (let i = allDays.length - 1; i >= 0; i--) {
-    if (allDays[i].xp > 0) {
+  for (let i = chronologicalDays.length - 1; i >= 0; i--) {
+    if (chronologicalDays[i].xp > 0) {
       currentStreak++;
     } else {
       break;
@@ -131,54 +146,14 @@ function calculateHeatmapData(activities: Activity[]): { grid: DayData[][]; stat
 }
 
 export default function HeatmapPage() {
-  const [activities, setActivities] = useState<Activity[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { activities, loading, error, ready } = useStoredActivities();
   const [hoveredDay, setHoveredDay] = useState<DayData | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const { grid, stats } = useMemo(() => calculateHeatmapData(activities), [activities]);
 
-  useEffect(() => {
-    browser.storage.local.get('activitiesData').then((result) => {
-      if (result.activitiesData) {
-        setActivities(result.activitiesData as Activity[]);
-        setLoading(false);
-      } else {
-        setError('No activities data found. Please fetch data from the popup first.');
-        setLoading(false);
-      }
-    }).catch((err) => {
-      setError(`Error loading activities: ${err.message}`);
-      setLoading(false);
-    });
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="heatmap-container">
-        <h1>Loading...</h1>
-      </div>
-    );
+  if (!ready) {
+    return <PageStatus className="heatmap-container" loading={loading} error={error} />;
   }
-
-  if (error) {
-    return (
-      <div className="heatmap-container">
-        <h1>Error</h1>
-        <p className="error">{error}</p>
-      </div>
-    );
-  }
-
-  if (activities.length === 0) {
-    return (
-      <div className="heatmap-container">
-        <h1>No Activities</h1>
-        <p>No activities available to display.</p>
-      </div>
-    );
-  }
-
-  const { grid, stats } = calculateHeatmapData(activities);
   const weekdayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   // Get month labels for columns
@@ -330,9 +305,7 @@ export default function HeatmapPage() {
             {hoveredDay.xp === 0 ? 'No activity' : `${hoveredDay.xp} XP`}
           </div>
           {hoveredDay.courseNames.size > 0 && (
-            <div className="tooltip-courses">
-              {Array.from(hoveredDay.courseNames).join(', ')}
-            </div>
+            <div className="tooltip-courses">{Array.from(hoveredDay.courseNames).join(', ')}</div>
           )}
         </div>
       )}

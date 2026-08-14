@@ -7,4 +7,3 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <OverviewPage />
   </React.StrictMode>
 );
-

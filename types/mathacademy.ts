@@ -130,4 +130,3 @@ export interface EnrichedFrontierTopic {
   stats: FrontierTopicStats;
   sortKey: number;
 }
-

@@ -1,5 +1,6 @@
 import type { Activity } from '@/types/mathacademy';
-import { groupActivitiesByDay, toLocalDateString, type DailyData } from './overview-calculations';
+import { toLocalDateKey } from '@/utils/dates';
+import { groupActivitiesByDay, type DailyData } from './overview-calculations';
 
 /**
  * Chart data format for uPlot
@@ -9,232 +10,141 @@ export interface ChartData {
   values: number[];
 }
 
+interface DailySeries {
+  /** One entry per calendar day from the chart start through today. */
+  dates: Date[];
+  dateKeys: string[];
+  /** Aggregated activity data for days that had any activity. */
+  byDay: Map<string, DailyData>;
+}
+
 /**
- * Get the date range for charts, ensuring it extends through today
- * If explicitStartDate is provided, use that instead of the first activity date
+ * Build the day-by-day scaffolding every chart shares: a continuous range of
+ * calendar days (including zero-activity days) from the chart start date
+ * through today, plus a lookup of aggregated data for active days.
+ *
+ * Returns null when there are no activities; charts then render a flat line.
  */
-function getChartDateRange(activities: Activity[], explicitStartDate?: Date): { firstDate: Date; lastDate: Date } {
+function buildDailySeries(activities: Activity[], explicitStartDate?: Date): DailySeries | null {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  if (activities.length === 0) {
-    const firstDate = explicitStartDate || today;
-    return { firstDate, lastDate: today };
-  }
+  if (activities.length === 0) return null;
 
   const dailyData = groupActivitiesByDay(activities);
-  const firstActivityDate = new Date(dailyData[0].date);
+  const firstDate = explicitStartDate || new Date(dailyData[0].date);
 
-  // Use explicit start date if provided, otherwise use first activity date
-  const firstDate = explicitStartDate || firstActivityDate;
-
-  return { firstDate, lastDate: today };
-}
-
-/**
- * Generate all dates in a range as an array of date strings and Date objects
- */
-function generateDateRange(firstDate: Date, lastDate: Date): { dateStrings: string[]; dates: Date[] } {
-  const dateStrings: string[] = [];
   const dates: Date[] = [];
+  const dateKeys: string[] = [];
   const currentDate = new Date(firstDate);
-
-  while (currentDate <= lastDate) {
-    dateStrings.push(toLocalDateString(currentDate));
+  while (currentDate <= today) {
     dates.push(new Date(currentDate));
+    dateKeys.push(toLocalDateKey(currentDate));
     currentDate.setDate(currentDate.getDate() + 1);
   }
 
-  return { dateStrings, dates };
+  const byDay = new Map(dailyData.map((day) => [day.date, day]));
+
+  return { dates, dateKeys, byDay };
+}
+
+function emptyChart(explicitStartDate?: Date): ChartData {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const firstDate = explicitStartDate || today;
+  return {
+    timestamps: [firstDate.getTime() / 1000, today.getTime() / 1000],
+    values: [0, 0],
+  };
 }
 
 /**
- * Get cumulative XP data for chart (include zero-activity days)
- * @param startDate Optional explicit start date for the chart range (useful for filtered time periods)
+ * Map each day in the series to a value.
+ */
+function buildChart(
+  activities: Activity[],
+  startDate: Date | undefined,
+  valueForDay: (series: DailySeries, index: number) => number
+): ChartData {
+  const series = buildDailySeries(activities, startDate);
+  if (!series) return emptyChart(startDate);
+
+  const timestamps: number[] = [];
+  const values: number[] = [];
+
+  series.dates.forEach((date, i) => {
+    timestamps.push(date.getTime() / 1000);
+    values.push(valueForDay(series, i));
+  });
+
+  return { timestamps, values };
+}
+
+/**
+ * Cumulative XP over time (includes zero-activity days).
  */
 export function getCumulativeXPData(activities: Activity[], startDate?: Date): ChartData {
-  const { firstDate, lastDate } = getChartDateRange(activities, startDate);
-
-  if (activities.length === 0) {
-    return { timestamps: [firstDate.getTime() / 1000, lastDate.getTime() / 1000], values: [0, 0] };
-  }
-
-  const dailyData = groupActivitiesByDay(activities);
-
-  // Create lookup for daily XP
-  const dailyXPLookup: { [key: string]: number } = {};
-  dailyData.forEach(day => {
-    dailyXPLookup[day.date] = day.xp;
+  let cumulative = 0;
+  return buildChart(activities, startDate, ({ byDay, dateKeys }, i) => {
+    cumulative += byDay.get(dateKeys[i])?.xp ?? 0;
+    return cumulative;
   });
-
-  // Generate cumulative data for ALL days (including zero-activity days)
-  const { dateStrings, dates } = generateDateRange(firstDate, lastDate);
-  const timestamps: number[] = [];
-  const values: number[] = [];
-  let cumulativeXP = 0;
-
-  dates.forEach((date, i) => {
-    const dayXP = dailyXPLookup[dateStrings[i]] || 0;
-    cumulativeXP += dayXP;
-    timestamps.push(date.getTime() / 1000);
-    values.push(cumulativeXP);
-  });
-
-  return { timestamps, values };
 }
 
 /**
- * Get cumulative activities data for chart (include zero-activity days)
- * @param startDate Optional explicit start date for the chart range (useful for filtered time periods)
+ * Cumulative activity count over time (includes zero-activity days).
  */
 export function getCumulativeActivitiesData(activities: Activity[], startDate?: Date): ChartData {
-  const { firstDate, lastDate } = getChartDateRange(activities, startDate);
-
-  if (activities.length === 0) {
-    return { timestamps: [firstDate.getTime() / 1000, lastDate.getTime() / 1000], values: [0, 0] };
-  }
-
-  const dailyData = groupActivitiesByDay(activities);
-
-  // Create lookup for daily activity count
-  const dailyCountLookup: { [key: string]: number } = {};
-  dailyData.forEach(day => {
-    dailyCountLookup[day.date] = day.count;
+  let cumulative = 0;
+  return buildChart(activities, startDate, ({ byDay, dateKeys }, i) => {
+    cumulative += byDay.get(dateKeys[i])?.count ?? 0;
+    return cumulative;
   });
-
-  // Generate cumulative data for ALL days (including zero-activity days)
-  const { dateStrings, dates } = generateDateRange(firstDate, lastDate);
-  const timestamps: number[] = [];
-  const values: number[] = [];
-  let cumulativeCount = 0;
-
-  dates.forEach((date, i) => {
-    const dayCount = dailyCountLookup[dateStrings[i]] || 0;
-    cumulativeCount += dayCount;
-    timestamps.push(date.getTime() / 1000);
-    values.push(cumulativeCount);
-  });
-
-  return { timestamps, values };
 }
 
 /**
- * Get daily XP data (actual XP per day, not rolling average)
- * @param startDate Optional explicit start date for the chart range (useful for filtered time periods)
+ * Actual XP earned per day (not a rolling average).
  */
 export function getDailyXPData(activities: Activity[], startDate?: Date): ChartData {
-  const { firstDate, lastDate } = getChartDateRange(activities, startDate);
+  return buildChart(
+    activities,
+    startDate,
+    ({ byDay, dateKeys }, i) => byDay.get(dateKeys[i])?.xp ?? 0
+  );
+}
 
-  if (activities.length === 0) {
-    return { timestamps: [firstDate.getTime() / 1000, lastDate.getTime() / 1000], values: [0, 0] };
-  }
-
-  const dailyData = groupActivitiesByDay(activities);
-
-  // Create lookup for daily XP
-  const dailyXPLookup: { [key: string]: number } = {};
-  dailyData.forEach(day => {
-    dailyXPLookup[day.date] = day.xp;
-  });
-
-  // Generate data for ALL days (including zero-activity days)
-  const { dateStrings, dates } = generateDateRange(firstDate, lastDate);
-  const timestamps: number[] = [];
-  const values: number[] = [];
-
-  dates.forEach((date, i) => {
-    const dayXP = dailyXPLookup[dateStrings[i]] || 0;
-    timestamps.push(date.getTime() / 1000);
-    values.push(dayXP);
-  });
-
-  return { timestamps, values };
+/** Rolling window of the 7 days ending at index i (fewer at the range start). */
+function rollingWindow(dateKeys: string[], i: number): string[] {
+  return dateKeys.slice(Math.max(0, i - 6), i + 1);
 }
 
 /**
- * Get average XP per day over time (7-day rolling average)
- * @param startDate Optional explicit start date for the chart range (useful for filtered time periods)
+ * Average XP per day over time (7-day rolling average).
  */
 export function getAvgXPOverTimeData(activities: Activity[], startDate?: Date): ChartData {
-  const { firstDate, lastDate } = getChartDateRange(activities, startDate);
-
-  if (activities.length === 0) {
-    return { timestamps: [firstDate.getTime() / 1000, lastDate.getTime() / 1000], values: [0, 0] };
-  }
-
-  const dailyData = groupActivitiesByDay(activities);
-
-  // Create lookup for daily XP
-  const dailyXPLookup: { [key: string]: number } = {};
-  dailyData.forEach(day => {
-    dailyXPLookup[day.date] = day.xp;
+  return buildChart(activities, startDate, ({ byDay, dateKeys }, i) => {
+    const window = rollingWindow(dateKeys, i);
+    const totalXP = window.reduce((sum, key) => sum + (byDay.get(key)?.xp ?? 0), 0);
+    return Math.round(totalXP / window.length);
   });
-
-  // Generate all dates and calculate 7-day rolling average
-  const { dateStrings, dates } = generateDateRange(firstDate, lastDate);
-  const timestamps: number[] = [];
-  const values: number[] = [];
-
-  // Calculate 7-day rolling average for each day (including zero-XP days)
-  for (let i = 0; i < dateStrings.length; i++) {
-    const windowStart = Math.max(0, i - 6); // 7 days including current day
-    const window = dateStrings.slice(windowStart, i + 1);
-
-    const totalXP = window.reduce((sum, dateKey) => sum + (dailyXPLookup[dateKey] || 0), 0);
-    const rollingAvg = Math.round(totalXP / window.length);
-
-    timestamps.push(dates[i].getTime() / 1000);
-    values.push(rollingAvg);
-  }
-
-  return { timestamps, values };
 }
 
 /**
- * Get success rate (attainment %) over time (7-day rolling average)
- * @param startDate Optional explicit start date for the chart range (useful for filtered time periods)
+ * XP attainment percentage over time (7-day rolling average).
  */
 export function getSuccessRateOverTimeData(activities: Activity[], startDate?: Date): ChartData {
-  const { firstDate, lastDate } = getChartDateRange(activities, startDate);
-
-  if (activities.length === 0) {
-    return { timestamps: [firstDate.getTime() / 1000, lastDate.getTime() / 1000], values: [0, 0] };
-  }
-
-  const dailyData = groupActivitiesByDay(activities);
-
-  // Create lookup for daily data
-  const dailyDataLookup: { [key: string]: DailyData } = {};
-  dailyData.forEach(day => {
-    dailyDataLookup[day.date] = day;
-  });
-
-  // Generate all dates and calculate 7-day rolling attainment
-  const { dateStrings, dates } = generateDateRange(firstDate, lastDate);
-  const timestamps: number[] = [];
-  const values: number[] = [];
-
-  for (let i = 0; i < dateStrings.length; i++) {
-    const windowStart = Math.max(0, i - 6); // 7 days including current day
-    const window = dateStrings.slice(windowStart, i + 1);
-
+  return buildChart(activities, startDate, ({ byDay, dateKeys }, i) => {
     let totalEarned = 0;
     let totalPossible = 0;
 
-    window.forEach(dateKey => {
-      const dayData = dailyDataLookup[dateKey];
-      if (dayData) {
-        totalEarned += dayData.totalEarned;
-        totalPossible += dayData.totalPossible;
+    rollingWindow(dateKeys, i).forEach((key) => {
+      const day = byDay.get(key);
+      if (day) {
+        totalEarned += day.totalEarned;
+        totalPossible += day.totalPossible;
       }
     });
 
-    const rollingAttainment = totalPossible > 0 ? Math.round((totalEarned / totalPossible) * 100) : 0;
-
-    timestamps.push(dates[i].getTime() / 1000);
-    values.push(rollingAttainment);
-  }
-
-  return { timestamps, values };
+    return totalPossible > 0 ? Math.round((totalEarned / totalPossible) * 100) : 0;
+  });
 }
-

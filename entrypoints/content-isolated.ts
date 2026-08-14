@@ -1,13 +1,12 @@
-// This script runs in the ISOLATED world and has access to extension APIs
+import { MATH_ACADEMY_MATCHES } from '@/utils/constants';
+
+// Runs in the ISOLATED world: has access to extension APIs, but not to the
+// page's JavaScript variables. Bridges extension messages to the MAIN world
+// script via window.postMessage.
 export default defineContentScript({
-  matches: ['*://*.mathacademy.com/*', '*://mathacademy.com/*'],
+  matches: MATH_ACADEMY_MATCHES,
   main() {
-    console.log('[Math Academy Stats] ISOLATED world script loaded');
-
-    // Listen for requests from the extension
     browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
-      console.log('[Math Academy Stats] Received extension message:', message.type);
-
       if (message.type === 'GET_MATH_ACADEMY_IDS') {
         // Request data from the MAIN world script
         window.postMessage({ type: 'GET_MATH_ACADEMY_IDS_REQUEST' }, '*');
@@ -17,12 +16,11 @@ export default defineContentScript({
           if (event.source !== window) return;
 
           if (event.data.type === 'GET_MATH_ACADEMY_IDS_RESPONSE') {
-            console.log('[Math Academy Stats] Got IDs from MAIN world:', event.data);
             window.removeEventListener('message', messageHandler);
 
             sendResponse({
               studentId: event.data.studentId,
-              courseId: event.data.courseId
+              courseId: event.data.courseId,
             });
           }
         };
@@ -35,7 +33,7 @@ export default defineContentScript({
           sendResponse({
             error: 'Timeout waiting for page data',
             studentId: null,
-            courseId: null
+            courseId: null,
           });
         }, 2000);
 

@@ -3,7 +3,7 @@ import type { Activity } from '@/types/mathacademy';
 const MAX_PAGES = 200;
 const SLEEP_MS = 200;
 const OVERLAP_DAYS = 1000;
-const VERBOSE = true;
+const VERBOSE = import.meta.env.DEV;
 const CACHE_KEY = 'mathacademyActivitiesCache';
 
 type CachePayload = {
@@ -41,7 +41,7 @@ function writeCache(items: Activity[]): void {
   try {
     const payload: CachePayload = {
       items,
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     };
     localStorage.setItem(CACHE_KEY, JSON.stringify(payload));
   } catch (err) {
@@ -64,18 +64,18 @@ export function clearActivityCache(): void {
   }
 }
 
-const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 // Detect the current Math Academy hostname from the active tab
 async function getMathAcademyHostname(): Promise<string> {
   try {
     const tabs = await browser.tabs.query({ active: true, currentWindow: true });
     const currentUrl = tabs[0]?.url;
-    
+
     if (currentUrl) {
       const url = new URL(currentUrl);
       const hostname = url.hostname;
-      
+
       // Check if we're on mathacademy.com or www.mathacademy.com
       if (hostname === 'mathacademy.com' || hostname === 'www.mathacademy.com') {
         return hostname;
@@ -84,17 +84,30 @@ async function getMathAcademyHostname(): Promise<string> {
   } catch (err) {
     console.warn('Failed to detect hostname from active tab:', err);
   }
-  
+
   // Default to mathacademy.com if detection fails
   return 'mathacademy.com';
 }
 
 // Force the path to look like PST format with -0800 offset
 function toPSTPathString(d: Date): string {
-  const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-  const pad2 = (n: number) => String(n).padStart(2, "0");
-  
+  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const months = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
+  const pad2 = (n: number) => String(n).padStart(2, '0');
+
   return `${days[d.getDay()]} ${months[d.getMonth()]} ${pad2(d.getDate())} ${d.getFullYear()} ${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())} GMT-0800 (Pacific Standard Time)`;
 }
 
@@ -105,12 +118,12 @@ function getItemTimeMs(item: Activity): number | undefined {
   const candidate = item?.completed;
 
   if (!candidate) return undefined;
-  
-  if (typeof candidate === "number" && Number.isFinite(candidate)) {
+
+  if (typeof candidate === 'number' && Number.isFinite(candidate)) {
     return candidate;
   }
-  
-  if (typeof candidate === "string") {
+
+  if (typeof candidate === 'string') {
     const n = Number(candidate);
     if (Number.isFinite(n) && String(n).length >= 10) {
       return n;
@@ -120,7 +133,7 @@ function getItemTimeMs(item: Activity): number | undefined {
       return t;
     }
   }
-  
+
   return undefined;
 }
 
@@ -135,34 +148,35 @@ function sortActivities(items: Activity[]): Activity[] {
 
 async function fetchPage(baseUrl: string, cutoff: Date): Promise<Activity[]> {
   const url = baseUrl + enc(cutoff);
-  if (VERBOSE) console.log("GET", url);
-  
+  if (VERBOSE) console.log('GET', url);
+
   let response;
   try {
-    response = await fetch(url, { credentials: "include" });
+    response = await fetch(url, { credentials: 'include' });
   } catch (err) {
     throw new Error(
       `Failed to fetch: ${err instanceof Error ? err.message : String(err)}\n` +
-      `URL: ${url}\n` +
-      `This might be a network error, CORS issue, or missing host_permissions in the extension manifest.`
+        `URL: ${url}\n` +
+        `This might be a network error, CORS issue, or missing host_permissions in the extension manifest.`,
+      { cause: err }
     );
   }
-  
+
   if (!response.ok) {
     throw new Error(`HTTP ${response.status} ${response.statusText} - URL: ${url}`);
   }
-  
+
   const data = await response.json();
   if (!Array.isArray(data)) {
     const dataType = data === null ? 'null' : typeof data;
     const dataPreview = JSON.stringify(data, null, 2).slice(0, 500);
     throw new Error(
       `Expected array page but received ${dataType}.\n` +
-      `URL: ${url}\n` +
-      `Response preview: ${dataPreview}${dataPreview.length === 500 ? '...' : ''}`
+        `URL: ${url}\n` +
+        `Response preview: ${dataPreview}${dataPreview.length === 500 ? '...' : ''}`
     );
   }
-  
+
   return data;
 }
 
@@ -180,11 +194,11 @@ export async function fetchAllActivities(
   if (cachedActivities.length > 0) {
     onProgress?.(`Loaded ${cachedActivities.length} cached activities.`);
   }
-  
+
   // Set window: last 3 years to now
   const WINDOW_END = new Date();
   const WINDOW_START = new Date(Date.now() - 3 * 365 * 24 * 60 * 60 * 1000);
-  
+
   const newActivities: Activity[] = [];
   const cachedIds = new Set<number>();
 
@@ -194,19 +208,21 @@ export async function fetchAllActivities(
       cachedIds.add(id);
     }
   }
-  
+
   let cursor = new Date(WINDOW_END);
   let pages = 0;
   let lastCursorMs = cursor.getTime();
-  
+
   onProgress?.(`Starting fetch from ${cursor.toISOString()}...`);
-  
+
   let encounteredCachedItem = false;
 
   while (pages < MAX_PAGES && !encounteredCachedItem) {
     const page = await fetchPage(BASE_URL, cursor);
     if (VERBOSE) console.log(`Page ${pages + 1}: received ${page.length} items`);
-    onProgress?.(`Page ${pages + 1}: received ${page.length} items. Total new: ${newActivities.length}`);
+    onProgress?.(
+      `Page ${pages + 1}: received ${page.length} items. Total new: ${newActivities.length}`
+    );
 
     if (page.length === 0) {
       if (VERBOSE) console.log(`Empty page — stepping back ${OVERLAP_DAYS} days`);
@@ -214,12 +230,12 @@ export async function fetchAllActivities(
 
       if (cursor < WINDOW_START) break;
       if (cursor.getTime() === lastCursorMs) break;
-      
+
       lastCursorMs = cursor.getTime();
       await sleep(SLEEP_MS);
       continue;
     }
-    
+
     const freshItems: Activity[] = [];
 
     for (const item of page) {
@@ -242,15 +258,18 @@ export async function fetchAllActivities(
     }
 
     // Determine next cursor
-    const times = page.map(getItemTimeMs).filter(t => typeof t === "number" && Number.isFinite(t)) as number[];
-    
+    const times = page
+      .map(getItemTimeMs)
+      .filter((t) => typeof t === 'number' && Number.isFinite(t)) as number[];
+
     if (times.length > 0) {
       const oldest = Math.min(...times);
       const nextMs = oldest - 1; // Subtract 1ms to avoid re-fetching the last item
       const next = new Date(nextMs);
-      
+
       if (!(nextMs < lastCursorMs)) {
-        if (VERBOSE) console.warn(`No-progress cursor detected; forcing jump back ${OVERLAP_DAYS} days.`);
+        if (VERBOSE)
+          console.warn(`No-progress cursor detected; forcing jump back ${OVERLAP_DAYS} days.`);
         cursor = new Date(cursor.getTime() - OVERLAP_DAYS * 86400_000);
       } else {
         cursor = next;
@@ -259,28 +278,31 @@ export async function fetchAllActivities(
       if (VERBOSE) console.warn(`No parsable timestamps; forcing jump back ${OVERLAP_DAYS} days.`);
       cursor = new Date(cursor.getTime() - OVERLAP_DAYS * 86400_000);
     }
-    
+
     pages++;
-    if (VERBOSE) console.log(`Total new collected: ${newActivities.length}. Next cursor: ${cursor.toString()}`);
+    if (VERBOSE)
+      console.log(
+        `Total new collected: ${newActivities.length}. Next cursor: ${cursor.toString()}`
+      );
 
     if (cursor < WINDOW_START) {
-      if (VERBOSE) console.log("Crossed WINDOW_START; finishing pagination.");
+      if (VERBOSE) console.log('Crossed WINDOW_START; finishing pagination.');
       break;
     }
-    
+
     if (cursor.getTime() === lastCursorMs) {
-      if (VERBOSE) console.warn("Cursor unchanged after step; stopping to avoid loop.");
+      if (VERBOSE) console.warn('Cursor unchanged after step; stopping to avoid loop.');
       break;
     }
-    
+
     lastCursorMs = cursor.getTime();
     await sleep(SLEEP_MS);
   }
-  
+
   // Filter to window
   const combined = [...newActivities, ...cachedActivities];
 
-  const inWindow = combined.filter(item => {
+  const inWindow = combined.filter((item) => {
     const t = getItemTimeMs(item);
     if (t === undefined) return true;
     return t >= WINDOW_START.getTime() && t <= WINDOW_END.getTime();
@@ -294,4 +316,3 @@ export async function fetchAllActivities(
 
   return inWindow;
 }
-

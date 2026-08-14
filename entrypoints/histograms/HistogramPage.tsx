@@ -1,8 +1,9 @@
-import { useEffect, useState, useRef } from 'react';
-import type { Activity } from '@/types/mathacademy';
+import { useEffect, useMemo, useRef } from 'react';
 import uPlot from 'uplot';
 import 'uplot/dist/uPlot.min.css';
 import './histograms.css';
+import { useStoredActivities } from '@/hooks/useStoredActivities';
+import { PageStatus } from '@/components/PageStatus';
 import { calculateHistograms, type HistogramData } from './histogram-calculations';
 
 interface HistogramChartProps {
@@ -66,7 +67,7 @@ function HistogramChart({ title, bins, counts, color }: HistogramChartProps) {
         {
           stroke: color,
           fill: color,
-          paths: (u, seriesIdx) => {
+          paths: (u, _seriesIdx) => {
             const bucketWidth = 0.25;
             const barWidthRatio = 0.9;
 
@@ -147,59 +148,19 @@ function CourseHistograms({ data }: CourseHistogramsProps) {
 }
 
 export default function HistogramPage() {
-  const [activities, setActivities] = useState<Activity[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [histograms, setHistograms] = useState<HistogramData[]>([]);
+  const { activities, loading, error, ready } = useStoredActivities();
+  const histograms = useMemo(() => calculateHistograms(activities), [activities]);
 
-  useEffect(() => {
-    browser.storage.local.get('activitiesData').then((result) => {
-      if (result.activitiesData) {
-        const activitiesData = result.activitiesData as Activity[];
-        setActivities(activitiesData);
-        const histogramData = calculateHistograms(activitiesData);
-        setHistograms(histogramData);
-        setLoading(false);
-      } else {
-        setError('No activities data found. Please fetch data from the popup first.');
-        setLoading(false);
-      }
-    }).catch((err) => {
-      setError(`Error loading activities: ${err.message}`);
-      setLoading(false);
-    });
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="histograms-container">
-        <h1>Loading...</h1>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="histograms-container">
-        <h1>Error</h1>
-        <p className="error">{error}</p>
-      </div>
-    );
-  }
-
-  if (activities.length === 0) {
-    return (
-      <div className="histograms-container">
-        <h1>No Activities</h1>
-        <p>No activities available to display.</p>
-      </div>
-    );
+  if (!ready) {
+    return <PageStatus className="histograms-container" loading={loading} error={error} />;
   }
 
   return (
     <div className="histograms-container">
       <h1 className="page-title">XP per Minute Histograms</h1>
-      <p className="page-subtitle">Distribution of XP earned per minute for lessons and reviews by course</p>
+      <p className="page-subtitle">
+        Distribution of XP earned per minute for lessons and reviews by course
+      </p>
 
       {histograms.map((histogram) => (
         <CourseHistograms key={histogram.courseName} data={histogram} />

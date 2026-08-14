@@ -1,6 +1,12 @@
-import { useEffect, useState } from 'react';
-import type { CourseStats, Activity } from '@/types/mathacademy';
-import { generateStats } from '../popup/stats';
+import { useMemo } from 'react';
+import type { Activity, CourseStats } from '@/types/mathacademy';
+import { useStoredActivities } from '@/hooks/useStoredActivities';
+import { PageStatus } from '@/components/PageStatus';
+import { classifyActivity, type ActivityCategory } from '@/utils/classify-activity';
+import { generateStats, XP_THRESHOLDS } from '../popup/stats';
+
+const byCategory = (category: ActivityCategory) => (activity: Activity) =>
+  classifyActivity(activity) === category;
 
 interface StatsByType {
   all: CourseStats[];
@@ -13,67 +19,28 @@ interface StatsByType {
 }
 
 export default function StatsTable() {
-  const [statsByType, setStatsByType] = useState<StatsByType | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { activities, loading, error, ready } = useStoredActivities();
 
-  useEffect(() => {
-    // Load activities from browser storage
-    browser.storage.local.get('activitiesData').then((result) => {
-      if (result.activitiesData) {
-        const activities = result.activitiesData as Activity[];
-        
-        // Generate stats for all activity types
-        const stats: StatsByType = {
-          all: generateStats(activities),
-          lesson: generateStats(activities, 'Lesson'),
-          review: generateStats(activities, 'Review'),
-          quiz: generateStats(activities, 'Quiz'),
-          multistep: generateStats(activities, 'Multistep'),
-          placement: generateStats(activities, 'Placement'),
-          supplemental: generateStats(activities, 'Supplemental'),
-        };
-        
-        setStatsByType(stats);
-        setLoading(false);
-      } else {
-        setError('No activities data found. Please generate stats from the popup first.');
-        setLoading(false);
-      }
-    }).catch((err) => {
-      setError(`Error loading stats: ${err.message}`);
-      setLoading(false);
-    });
-  }, []);
+  // Generate stats for all activity types
+  const statsByType: StatsByType = useMemo(
+    () => ({
+      all: generateStats(activities),
+      lesson: generateStats(activities, byCategory('lesson')),
+      review: generateStats(activities, byCategory('review')),
+      quiz: generateStats(activities, byCategory('quiz')),
+      multistep: generateStats(activities, byCategory('multistep')),
+      // Finer-grained than the diagnostic category: these are raw API types
+      placement: generateStats(activities, (a) => a.type === 'Placement'),
+      supplemental: generateStats(activities, (a) => a.type === 'Supplemental'),
+    }),
+    [activities]
+  );
 
-  if (loading) {
-    return (
-      <div className="container">
-        <h1>Math Academy Stats</h1>
-        <p>Loading...</p>
-      </div>
-    );
+  if (!ready) {
+    return <PageStatus className="container" loading={loading} error={error} />;
   }
 
-  if (error) {
-    return (
-      <div className="container">
-        <h1>Math Academy Stats</h1>
-        <p className="error">{error}</p>
-      </div>
-    );
-  }
-
-  if (!statsByType) {
-    return (
-      <div className="container">
-        <h1>Math Academy Stats</h1>
-        <p>No stats available.</p>
-      </div>
-    );
-  }
-
-  const thresholds = [0.75, 1.0, 1.25, 1.5, 1.75, 2.0];
+  const thresholds = XP_THRESHOLDS;
 
   const renderStatsSection = (title: string, stats: CourseStats[]) => {
     if (stats.length === 0) {
@@ -88,7 +55,7 @@ export default function StatsTable() {
     return (
       <div key={title} className="stats-section">
         <h2 className="main-section-title">{title}</h2>
-        
+
         <h3 className="subsection-title">XP per Minute by Course</h3>
         <table className="stats-table">
           <thead>
@@ -149,14 +116,15 @@ export default function StatsTable() {
     <div className="container">
       <h1>Math Academy Stats - XP per Minute by Course</h1>
       <p className="description">
-        Statistics for activities completed in 2 hours or less, showing XP earned per minute of study time.
+        Statistics for activities completed in 2 hours or less, showing XP earned per minute of
+        study time.
       </p>
-      
+
       <div className="note-box">
-        <strong>Note:</strong> Activities that took more than 2 hours are excluded from these statistics. 
-        We assume that if an activity took more than 2 hours, the user didn't work continuously on that 
-        lesson but had a break, so including those data would be misleading. Unfortunately, we can't track 
-        exactly when you were working or not.
+        <strong>Note:</strong> Activities that took more than 2 hours are excluded from these
+        statistics. We assume that if an activity took more than 2 hours, the user didn't work
+        continuously on that lesson but had a break, so including those data would be misleading.
+        Unfortunately, we can't track exactly when you were working or not.
       </div>
 
       {renderStatsSection('All Activities', statsByType.all)}
@@ -169,4 +137,3 @@ export default function StatsTable() {
     </div>
   );
 }
-

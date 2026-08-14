@@ -1,4 +1,5 @@
 import type { Activity } from '@/types/mathacademy';
+import { classifyActivity } from '@/utils/classify-activity';
 
 export interface HistogramData {
   courseName: string;
@@ -33,13 +34,10 @@ function createHistogramBuckets(xpPerMinValues: number[]): { bins: number[]; cou
   }
 
   // Count values in each bucket
-  xpPerMinValues.forEach(xpPerMin => {
+  xpPerMinValues.forEach((xpPerMin) => {
     if (xpPerMin < MIN_XP || xpPerMin > MAX_XP) return;
 
-    const bucketIndex = Math.min(
-      Math.floor((xpPerMin - MIN_XP) / BUCKET_SIZE),
-      numBuckets - 1
-    );
+    const bucketIndex = Math.min(Math.floor((xpPerMin - MIN_XP) / BUCKET_SIZE), numBuckets - 1);
 
     counts[bucketIndex]++;
   });
@@ -51,18 +49,18 @@ export function calculateHistograms(activities: Activity[]): HistogramData[] {
   // Group activities by course
   const courseMap = new Map<string, { lessons: Activity[]; reviews: Activity[] }>();
 
-  activities.forEach(activity => {
+  activities.forEach((activity) => {
     const courseName = activity.test.course.name;
-    const activityType = activity.type;
+    const category = classifyActivity(activity);
 
-    if (!courseName || (activityType !== 'Lesson' && activityType !== 'Review')) return;
+    if (!courseName || (category !== 'lesson' && category !== 'review')) return;
 
     if (!courseMap.has(courseName)) {
       courseMap.set(courseName, { lessons: [], reviews: [] });
     }
 
     const courseData = courseMap.get(courseName)!;
-    if (activityType === 'Lesson') {
+    if (category === 'lesson') {
       courseData.lessons.push(activity);
     } else {
       courseData.reviews.push(activity);

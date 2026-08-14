@@ -5,15 +5,21 @@ export interface MathAcademyIds {
   error?: string;
 }
 
+interface IdsResponse {
+  studentId: number | null;
+  courseId: number | null;
+  error?: string;
+}
+
 /**
  * Attempts to send a message to a tab with retry logic
  */
 async function sendMessageWithRetry(
   tabId: number,
-  message: any,
+  message: { type: string },
   maxRetries: number = 3,
   delayMs: number = 200
-): Promise<any> {
+): Promise<IdsResponse | undefined> {
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
       const response = await browser.tabs.sendMessage(tabId, message);
@@ -24,7 +30,7 @@ async function sendMessageWithRetry(
         throw err;
       }
       // Wait before retrying
-      await new Promise(resolve => setTimeout(resolve, delayMs));
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
     }
   }
 }
@@ -37,7 +43,7 @@ export async function getMathAcademyIds(): Promise<MathAcademyIds> {
   try {
     // Try to find any Math Academy tab
     const allTabs = await browser.tabs.query({
-      url: ['*://*.mathacademy.com/*', '*://mathacademy.com/*']
+      url: ['*://*.mathacademy.com/*', '*://mathacademy.com/*'],
     });
 
     if (!allTabs.length) {
@@ -52,7 +58,7 @@ export async function getMathAcademyIds(): Promise<MathAcademyIds> {
 
       try {
         const response = await sendMessageWithRetry(tab.id, {
-          type: 'GET_MATH_ACADEMY_IDS'
+          type: 'GET_MATH_ACADEMY_IDS',
         });
 
         // If we got valid IDs, return them with the hostname
@@ -63,9 +69,10 @@ export async function getMathAcademyIds(): Promise<MathAcademyIds> {
 
           return {
             ...response,
-            hostname: (hostname === 'mathacademy.com' || hostname === 'www.mathacademy.com')
-              ? hostname
-              : 'mathacademy.com'
+            hostname:
+              hostname === 'mathacademy.com' || hostname === 'www.mathacademy.com'
+                ? hostname
+                : 'mathacademy.com',
           };
         }
       } catch (err) {
@@ -83,14 +90,15 @@ export async function getMathAcademyIds(): Promise<MathAcademyIds> {
     // Provide a more helpful error message
     let userMessage = errorMessage;
     if (errorMessage.includes('Receiving end does not exist')) {
-      userMessage = 'Could not connect to Math Academy page. Please refresh the Math Academy tab and try again.';
+      userMessage =
+        'Could not connect to Math Academy page. Please refresh the Math Academy tab and try again.';
     }
 
     return {
       studentId: null,
       courseId: null,
       hostname: null,
-      error: userMessage
+      error: userMessage,
     };
   }
 }

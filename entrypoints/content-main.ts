@@ -1,28 +1,26 @@
-// This script runs in the MAIN world and has access to page variables
+import { MATH_ACADEMY_MATCHES } from '@/utils/constants';
+
+// Runs in the MAIN world: can read the page's JavaScript variables
+// (studentId, courseId) but has no extension API access. Answers requests
+// relayed by the ISOLATED world script.
 export default defineContentScript({
-  matches: ['*://*.mathacademy.com/*', '*://mathacademy.com/*'],
+  matches: MATH_ACADEMY_MATCHES,
   world: 'MAIN',
   main() {
-    console.log('[Math Academy Stats] MAIN world script loaded');
-
-    // Listen for requests from the isolated world script
     window.addEventListener('message', (event) => {
       // Only accept messages from same window
       if (event.source !== window) return;
 
       if (event.data.type === 'GET_MATH_ACADEMY_IDS_REQUEST') {
-        console.log('[Math Academy Stats] Received request for IDs');
-
-        // Access page variables
-        const win = window as any;
-        const result = {
-          type: 'GET_MATH_ACADEMY_IDS_RESPONSE',
-          studentId: typeof win.studentId !== 'undefined' ? win.studentId : null,
-          courseId: typeof win.courseId !== 'undefined' ? win.courseId : null
-        };
-
-        console.log('[Math Academy Stats] Sending IDs:', result);
-        window.postMessage(result, '*');
+        const win = window as typeof window & { studentId?: number; courseId?: number };
+        window.postMessage(
+          {
+            type: 'GET_MATH_ACADEMY_IDS_RESPONSE',
+            studentId: win.studentId ?? null,
+            courseId: win.courseId ?? null,
+          },
+          '*'
+        );
       }
     });
   },
