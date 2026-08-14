@@ -13,6 +13,7 @@ A browser extension for Chrome and Firefox that analyzes your [Math Academy](htt
 
 - **Daily Overview**: total XP, activities, XP/day, and attainment rate with time-series charts and course-transition markers
 - **XP/Minute Stats**: percentiles and threshold analysis by course and activity type
+- **XP/min Trend**: daily and weekly XP-per-minute over time, with a 7-day rolling average and week-over-week change
 - **Performance Histograms**: XP/min distributions for lessons and reviews, per course
 - **Daily XP Distribution**: histogram of daily XP totals with mean and median
 - **Activity Heatmap**: GitHub-style calendar of your last year of learning

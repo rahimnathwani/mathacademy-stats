@@ -1,0 +1,167 @@
+.xp-rate-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+}
+
+.xp-rate-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.xp-rate-header h1 {
+  font-size: 2.5em;
+  margin: 0 0 10px 0;
+  color: #24292e;
+}
+
+.xp-rate-subtitle {
+  font-size: 1.1em;
+  color: #586069;
+  margin: 0;
+}
+
+.stats-cards {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  margin-bottom: 40px;
+  flex-wrap: wrap;
+}
+
+.stats-card {
+  background: white;
+  border-radius: 10px;
+  padding: 25px 35px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  min-width: 150px;
+}
+
+.stats-value {
+  font-size: 2.2em;
+  font-weight: bold;
+  color: #8b5cf6;
+  margin-bottom: 8px;
+}
+
+.stats-label {
+  font-size: 0.95em;
+  color: #586069;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.chart-section {
+  margin-bottom: 40px;
+}
+
+.chart-wrapper {
+  background: white;
+  border-radius: 10px;
+  padding: 30px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.chart-title {
+  font-size: 1.3em;
+  color: #24292e;
+  margin: 0 0 20px 0;
+}
+
+.chart {
+  width: 100%;
+}
+
+.chart-legend {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.95em;
+  color: #586069;
+}
+
+.legend-line {
+  width: 30px;
+  height: 3px;
+  border-radius: 2px;
+}
+
+.weekly-table-section {
+  background: white;
+  border-radius: 10px;
+  padding: 30px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.weekly-table-section h2 {
+  font-size: 1.6em;
+  color: #24292e;
+  margin: 0 0 20px 0;
+}
+
+.weekly-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.weekly-table th {
+  text-align: left;
+  padding: 10px 12px;
+  font-size: 0.85em;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #586069;
+  border-bottom: 2px solid #e1e4e8;
+}
+
+.weekly-table td {
+  padding: 10px 12px;
+  color: #24292e;
+  border-bottom: 1px solid #f0f2f4;
+}
+
+.weekly-table tr:last-child td {
+  border-bottom: none;
+}
+
+.weekly-table .rate-cell {
+  font-weight: 600;
+  color: #8b5cf6;
+}
+
+.error {
+  color: #d73a49;
+  text-align: center;
+  padding: 20px;
+}
+
+@media (max-width: 768px) {
+  .xp-rate-container {
+    padding: 20px 10px;
+  }
+
+  .xp-rate-header h1 {
+    font-size: 1.8em;
+  }
+
+  .stats-cards {
+    gap: 15px;
+  }
+
+  .stats-card {
+    padding: 20px 25px;
+    min-width: 120px;
+  }
+}

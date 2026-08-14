@@ -1,4 +1,5 @@
 import type { Activity, CourseStats } from '@/types/mathacademy';
+import { getActivityDurationMinutes } from '@/utils/duration';
 
 function calculatePercentile(values: number[], percentile: number): number {
   if (values.length === 0) return 0;
@@ -28,9 +29,6 @@ export function generateStats(
   activities: Activity[],
   filter?: (activity: Activity) => boolean
 ): CourseStats[] {
-  // Filter out activities where completed - started > 2 hours
-  const TWO_HOURS_MS = 2 * 60 * 60 * 1000;
-
   const processedActivities: ProcessedActivity[] = [];
 
   for (const activity of activities) {
@@ -38,21 +36,11 @@ export function generateStats(
       continue;
     }
 
-    const startedMs = Date.parse(activity.started);
-    const completedMs = Date.parse(activity.completed);
-
-    if (!Number.isFinite(startedMs) || !Number.isFinite(completedMs)) {
+    // Excludes activities with invalid timestamps or duration > 2 hours
+    const durationMinutes = getActivityDurationMinutes(activity);
+    if (durationMinutes === null) {
       continue;
     }
-
-    const durationMs = completedMs - startedMs;
-
-    // Skip if duration > 2 hours or duration <= 0
-    if (durationMs > TWO_HOURS_MS || durationMs <= 0) {
-      continue;
-    }
-
-    const durationMinutes = durationMs / (60 * 1000);
 
     // Using the course the user was in when they did the activity,
     // even if it was a review of material from a different (prior) course.

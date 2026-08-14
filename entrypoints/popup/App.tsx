@@ -28,6 +28,12 @@ const REPORT_PAGES: ReportPage[] = [
     needsData: true,
   },
   {
+    path: '/xp-rate.html',
+    label: 'XP/min Trend',
+    description: 'Daily & weekly XP per minute over time',
+    needsData: true,
+  },
+  {
     path: '/histograms.html',
     label: 'Performance Histograms',
     description: 'XP/min distributions',

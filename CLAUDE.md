@@ -33,6 +33,7 @@ WXT uses a file-based entrypoint system. Each HTML file at the top level is a pa
   - `stats.ts` - XP-per-minute statistics (used by the stats page)
 - **overview/**: Daily overview with uPlot time-series charts (`overview-calculations.ts` for aggregation, `chart-data.ts` for chart series)
 - **stats/**: XP/minute percentile + threshold tables by course and activity type
+- **xp-rate/**: Daily and weekly XP-per-minute trend with 7-day rolling average (`xp-rate-calculations.ts`)
 - **histograms/**: XP/min distributions per course for lessons and reviews
 - **daily-xp/**: Histogram of daily XP totals
 - **heatmap/**: GitHub-style activity calendar
