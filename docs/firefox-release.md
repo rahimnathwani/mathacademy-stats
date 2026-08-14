@@ -5,6 +5,7 @@ This guide covers everything you need to prepare and submit your extension to Fi
 ## Prerequisites Checklist
 
 ### ✅ Already Complete
+
 - [x] Firefox build configuration (`pnpm run build:firefox`)
 - [x] Firefox zip packaging (`pnpm run zip:firefox`)
 - [x] Icons in all required sizes (16, 32, 48, 96, 128px)
@@ -27,14 +28,15 @@ This guide covers everything you need to prepare and submit your extension to Fi
      - Consider creating a privacy policy page
 
 3. **Test Firefox Build Locally**
+
    ```bash
    # Build Firefox extension
    pnpm run build:firefox
-   
+
    # Create zip for submission
    pnpm run zip:firefox
    ```
-   
+
    Test the extension:
    - Go to `about:debugging#/runtime/this-firefox`
    - Click "Load Temporary Add-on"
@@ -51,6 +53,7 @@ This guide covers everything you need to prepare and submit your extension to Fi
 ### Step 1: Prepare Your Submission Package
 
 1. Build the Firefox extension:
+
    ```bash
    pnpm run build:firefox
    pnpm run zip:firefox
@@ -67,6 +70,7 @@ This guide covers everything you need to prepare and submit your extension to Fi
 ### Step 3: Fill Out Listing Information
 
 **Required Information:**
+
 - **Name**: Math Academy Stats
 - **Summary**: Short description (e.g., "Analyze your Math Academy activity data with statistics, exports, and performance insights")
 - **Description**: Full description (can use content from README.md)
@@ -74,6 +78,7 @@ This guide covers everything you need to prepare and submit your extension to Fi
 - **Tags**: Add relevant tags (e.g., "math", "education", "statistics", "analytics")
 
 **Optional but Recommended:**
+
 - **Homepage**: Your GitHub repository URL
 - **Support URL**: GitHub issues page
 - **Screenshots**: Upload `screenshot.png` (or create new ones)
@@ -92,6 +97,7 @@ This guide covers everything you need to prepare and submit your extension to Fi
 ### Step 5: Post-Submission
 
 Once approved:
+
 - Extension will be available at `https://addons.mozilla.org/firefox/addon/[your-addon-id]/`
 - Update README.md with Firefox Add-ons link
 - Consider adding automatic updates via AMO's update URL
@@ -99,14 +105,17 @@ Once approved:
 ## Common Issues and Solutions
 
 ### Issue: Manifest Validation Errors
+
 - **Solution**: WXT should handle MV2 conversion automatically, but verify the generated manifest
 - Check that `host_permissions` are converted to `permissions` in MV2
 
 ### Issue: Content Script World Property
+
 - **Problem**: Firefox MV2 doesn't support `world: "MAIN"` property
 - **Solution**: WXT should remove this for Firefox builds, but verify in generated manifest
 
 ### Issue: Privacy Policy Required
+
 - **Solution**: Create a privacy policy page explaining:
   - What data is collected (user's Math Academy activity data)
   - How it's used (local analysis, no external transmission)
@@ -114,6 +123,7 @@ Once approved:
   - Data sharing (none)
 
 ### Issue: Screenshot Requirements
+
 - **Minimum**: 1 screenshot required
 - **Recommended**: 2-5 screenshots showing key features
 - **Dimensions**: 1280x720 or 1280x800 (16:9 or 16:10 aspect ratio)
@@ -126,26 +136,33 @@ If you need to create a privacy policy, here's a template:
 # Privacy Policy for Math Academy Stats Extension
 
 ## Data Collection
+
 This extension fetches your Math Academy activity data directly from Math Academy's API when you click "Get Activity Data" in the extension popup.
 
 ## Data Storage
+
 All data is stored locally in your browser using the browser's local storage API. No data is transmitted to any external servers except Math Academy's API (which you are already using when logged into Math Academy).
 
 ## Data Usage
+
 The extension uses your activity data to:
+
 - Generate statistics and performance metrics
 - Export data to JSON/CSV formats
 - Display visualizations and charts
 
 ## Data Sharing
+
 This extension does not share your data with any third parties. All processing happens locally in your browser.
 
 ## Permissions
+
 - `storage`: To temporarily store statistics between popup and stats pages
 - `tabs`: To open statistics pages in new tabs and detect the current Math Academy hostname
 - `https://mathacademy.com/*` and `https://www.mathacademy.com/*`: To fetch your activity data from Math Academy's API
 
 ## Contact
+
 For questions about this privacy policy, please open an issue on GitHub: [your-repo-url]
 ```
 
