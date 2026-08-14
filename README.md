@@ -1,134 +1,90 @@
-# Math Academy Stats Extension
+# Math Academy Stats
 
-A browser extension for Chrome and Firefox that helps you analyze your Math Academy activity data.
+[![CI](https://github.com/rahimnathwani/mathacademy-stats/actions/workflows/ci.yml/badge.svg)](https://github.com/rahimnathwani/mathacademy-stats/actions/workflows/ci.yml)
+[![Chrome Web Store](https://img.shields.io/chrome-web-store/v/fkjemgghojefccgmlimnanhnofndckin)](https://chromewebstore.google.com/detail/math-academy-stats/fkjemgghojefccgmlimnanhnofndckin)
+[![Firefox Add-ons](https://img.shields.io/amo/v/math-academy-stats)](https://addons.mozilla.org/en-US/firefox/addon/math-academy-stats/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+A browser extension for Chrome and Firefox that analyzes your [Math Academy](https://mathacademy.com) activity data: charts, statistics, and CSV/JSON export. All analysis happens locally in your browser.
 
 ![Screenshot](screenshot.png)
 
 ## Features
 
-- **Fetch Activity Data**: Download all your completed Math Academy activities with automatic pagination and deduplication
-- **Export to JSON**: Save all your activity data in JSON format
-- **Export to CSV**: Export activity data to CSV with key fields for analysis in spreadsheets
-- **Generate Statistics**: View detailed XP per minute statistics by course, including percentiles and performance metrics
+- **Daily Overview**: total XP, activities, XP/day, and attainment rate with time-series charts and course-transition markers
+- **XP/Minute Stats**: percentiles and threshold analysis by course and activity type
+- **Performance Histograms**: XP/min distributions for lessons and reviews, per course
+- **Daily XP Distribution**: histogram of daily XP totals with mean and median
+- **Activity Heatmap**: GitHub-style calendar of your last year of learning
+- **Task Types Analysis**: lessons, reviews, quizzes, multisteps, diagnostics breakdown
+- **Weekday Patterns**: average XP by day of week
+- **Upcoming Topics**: frontier topics ranked by how solid their prerequisites are
+- **Export**: full activity data as JSON, or CSV for spreadsheets
 
 ## Installation
 
-### 🚀 Install from browser web store (recommended)
+### Browser web store (recommended)
 
-Chrome: [https://chromewebstore.google.com/detail/math-academy-stats/fkjemgghojefccgmlimnanhnofndckin](https://chromewebstore.google.com/detail/math-academy-stats/fkjemgghojefccgmlimnanhnofndckin)
+- **Chrome**: [Chrome Web Store](https://chromewebstore.google.com/detail/math-academy-stats/fkjemgghojefccgmlimnanhnofndckin)
+- **Firefox**: [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/math-academy-stats/)
 
-Firefox: [https://addons.mozilla.org/en-US/firefox/addon/math-academy-stats/](https://addons.mozilla.org/en-US/firefox/addon/math-academy-stats/)
+### From a GitHub release
 
-### Quick Install latest release from GitHub
+1. Download `chrome-mv3.zip` or `firefox-mv2.zip` from the [Releases page](https://github.com/rahimnathwani/mathacademy-stats/releases) and extract it
+2. **Chrome**: open `chrome://extensions/`, enable "Developer mode", click "Load unpacked", select the extracted folder
+3. **Firefox**: open `about:debugging#/runtime/this-firefox`, click "Load Temporary Add-on", select the extracted `manifest.json`
 
-**For most users, install from the latest release:**
-
-1. Go to the [Releases page](https://github.com/rahimnathwani/mathacademy-stats/releases)
-2. Download the zip file for your browser:
-   - **Chrome**: Download `chrome-mv3.zip`
-   - **Firefox**: Download `firefox-mv2.zip`
-3. Extract the zip file to a folder on your computer
-4. Follow the browser-specific installation steps below
-
-#### Chrome Installation
-1. Open Chrome and navigate to `chrome://extensions/`
-2. Enable "Developer mode" in the top right
-3. Click "Load unpacked" and select the extracted `chrome-mv3` folder
-
-#### Firefox Installation
-1. Open Firefox and navigate to `about:debugging#/runtime/this-firefox`
-2. Click "Load Temporary Add-on"
-3. Navigate to the extracted `firefox-mv2` folder and select the `manifest.json` file
-
-### 🔧 Build from Source (For Developers)
-
-**Only use this if you want to modify the extension or contribute to development:**
-
-1. Clone this repository:
-   ```bash
-   git clone https://github.com/rahimnathwani/mathacademy-stats.git
-   cd mathacademy-stats
-   ```
-
-2. Install dependencies:
-   ```bash
-   pnpm install
-   ```
-
-3. Build the extension:
-   ```bash
-   # For Chrome
-   pnpm run build
-   
-   # For Firefox
-   pnpm run build:firefox
-   ```
-
-4. Follow the browser-specific installation steps above, but use the `.output/chrome-mv3` or `.output/firefox-mv2` directories instead
-
-## Development
-
-**This section is only for developers who want to modify the extension.**
-
-### Development Commands
-
-Start the development server with hot reload:
+### From source
 
 ```bash
-# For Chrome
-pnpm run dev
-
-# For Firefox
-pnpm run dev:firefox
+git clone https://github.com/rahimnathwani/mathacademy-stats.git
+cd mathacademy-stats
+pnpm install
+pnpm run build          # Chrome  -> .output/chrome-mv3/
+pnpm run build:firefox  # Firefox -> .output/firefox-mv2/
 ```
 
-### Available Scripts
-
-- `pnpm run dev` - Start Chrome development server with hot reload
-- `pnpm run dev:firefox` - Start Firefox development server with hot reload
-- `pnpm run build` - Build Chrome extension for production
-- `pnpm run build:firefox` - Build Firefox extension for production
-- `pnpm run zip` - Create zip file for Chrome extension
-- `pnpm run zip:firefox` - Create zip file for Firefox extension
+Then load the output directory as an unpacked extension (steps above).
 
 ## Usage
 
-1. Make sure you're logged into Math Academy (https://mathacademy.com or https://www.mathacademy.com)
-2. Click the extension icon to open the popup
-3. Click "Get Activity Data" to fetch all your activities (this may take a few moments - the extension automatically detects which hostname you're using)
-4. Once data is loaded, you can:
-   - **Download JSON**: Get all your activity data in JSON format
-   - **Download CSV**: Export data to CSV with these fields:
-     - id, type, points, pointsAwarded
-     - topic.id, topic.name, topic.course.id, topic.course.name
-     - started, completed
-     - test.id, test.name, test.course.id, test.course.name
-   - **Generate Stats**: Opens a new tab with detailed statistics
+1. Log in to Math Academy (mathacademy.com or www.mathacademy.com)
+2. Click the extension icon and press **Fetch Activity Data** — fetching is incremental, so refreshes only pull new activities
+3. Open any report from the popup, or export your data as JSON/CSV
 
-## Statistics
+## How statistics are computed
 
-The "Generate Stats" feature provides:
+- **XP per minute**: `pointsAwarded / durationMinutes`, grouped by the course you were in when you completed the activity
+- **Outlier filtering**: activities taking longer than 2 hours are excluded — a long gap usually means the tab was left open, not 2+ hours of continuous work
+- **Diagnostics**: counted as 100% attainment, since diagnostics have no fixed base point value
+- **Daily grouping**: uses your local timezone, so late-evening sessions count toward the right day
 
-- **Filtering**: Only includes activities completed within 2 hours of starting
-- **XP per Minute**: Calculates efficiency by dividing points awarded by duration
-- **Percentiles**: Shows 25th, 50th (median), and 75th percentiles for each course
-- **Performance Metrics**: Percentage of activities achieving at least 1 XP per minute
-- **Course Breakdown**: Separate statistics for each Math Academy course you've studied
+## Privacy
 
-## Technical Details
+- Your activity data is fetched directly from Math Academy's API using your existing login session
+- Everything is stored and processed locally in your browser; nothing is sent to any third-party server
+- Permissions: `storage` (pass data between popup and report pages), `tabs` (open report tabs, detect which Math Academy hostname you use), and host access to `mathacademy.com` (call the API)
 
-Built with:
-- [WXT](https://wxt.dev) - Browser extension framework
-- React + TypeScript
-- Manifest V3 (Chrome) and V2 (Firefox)
+## Development
 
-## Permissions
+```bash
+pnpm install            # install dependencies
+pnpm run dev            # Chrome dev server with hot reload
+pnpm run dev:firefox    # Firefox dev server with hot reload
+pnpm run check          # typecheck + lint + format check
+pnpm run zip            # package Chrome extension
+pnpm run zip:firefox    # package Firefox extension
+```
 
-The extension requires:
-- `storage`: To temporarily store statistics between popup and stats page
-- `tabs`: To open the statistics page in a new tab and detect the current Math Academy hostname
-- `https://mathacademy.com/*` and `https://www.mathacademy.com/*`: To fetch your activity data from the Math Academy API (automatically detects which hostname you're using)
+Built with [WXT](https://wxt.dev), React, TypeScript, and [uPlot](https://github.com/leeoniya/uPlot). Manifest V3 for Chrome, V2 for Firefox, from a single codebase.
+
+- `entrypoints/` — popup and one directory per report page (WXT file-based entrypoints)
+- `components/`, `hooks/`, `utils/` — shared UI and logic
+- `docs/api-samples/` — example Math Academy API responses
+- `CLAUDE.md` — architecture notes
+
+Releases are cut by pushing a `v*.*.*` tag; CI builds and attaches both zips. See [docs/firefox-release.md](docs/firefox-release.md) for the AMO submission guide.
 
 ## License
 
-This is a personal project for analyzing Math Academy data.
+[MIT](LICENSE)
