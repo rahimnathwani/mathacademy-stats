@@ -3,28 +3,30 @@ name: Build and Release
 on:
   push:
     tags:
-      - "v*.*.*"   # push tags like v1.2.3 to trigger
+      - 'v*.*.*' # push tags like v1.2.3 to trigger
 
 jobs:
   build-release:
     runs-on: ubuntu-latest
     permissions:
-      contents: write   # needed to publish the release
+      contents: write # needed to publish the release
 
     steps:
       - name: Check out
         uses: actions/checkout@v4
 
+      # Version comes from the packageManager field in package.json
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: '20'
+          cache: pnpm
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-          run_install: true
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
       - name: Clean previous builds
         run: rm -rf .output
