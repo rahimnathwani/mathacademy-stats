@@ -47,13 +47,13 @@ WXT uses a file-based entrypoint system. Each HTML file at the top level is a pa
 
 - `components/` - `PageStatus` (loading/error/empty screens), `CategoricalBarChart` (uPlot bar chart)
 - `hooks/` - `useStoredActivities` (loads activities every report page starts from)
-- `utils/` - `storage.ts` (storage keys + helpers), `dates.ts` (`toLocalDateKey`), `classify-activity.ts` (single source of truth for lesson/review/quiz/multistep/diagnostic categorization)
+- `utils/` - `storage.ts` (storage keys + helpers), `dedupe-activities.ts` (dedupe by id; applied on fetch and on every read), `dates.ts` (`toLocalDateKey`), `classify-activity.ts` (single source of truth for lesson/review/quiz/multistep/diagnostic categorization)
 - `types/mathacademy.ts` - Core data models: Activity, Course, Topic, Test, CourseStats, knowledge-graph types
 - `docs/api-samples/` - Example API responses for `/api/previous-tasks/` and the knowledge graph
 
 ### Data Flow
 
-1. **Fetch**: Popup calls `/api/previous-tasks/` with pagination and deduplication; caches in localStorage (key `mathacademyActivitiesCache`); stops when it hits a cached activity (incremental updates); fetches a 3-year window with 1000-day jumps on empty pages
+1. **Fetch**: Popup calls `/api/previous-tasks/` with pagination and deduplication; caches in localStorage (key `mathacademyActivitiesCache`); skips already-seen ids (`dedupeActivities`) and stops after 2 consecutive pages with nothing new (incremental updates); fetches a 3-year window with 1000-day jumps on empty pages
 2. **Store**: Raw activities are saved to `browser.storage.local` (key in `utils/storage.ts`) when a report is opened
 3. **Display**: Report pages read from storage via `useStoredActivities` and render tables/charts (uPlot)
 
@@ -67,7 +67,7 @@ WXT uses a file-based entrypoint system. Each HTML file at the top level is a pa
 ## Common Gotchas
 
 - **Content script registration**: WXT builds the content-script entrypoints but does not put MAIN-world scripts in the manifest; both are registered manually in `wxt.config.ts`. Removing that block silently drops them from the manifest.
-- **API date format**: `fetchActivities.ts` formats cursor dates as PST strings (`toPSTPathString`) because that's what the API expects in the URL path.
+- **API date format**: `fetchActivities.ts` formats cursor dates (`toApiPathString`) using the local clock plus the real local UTC offset and zone name. The label must match the hours, or the server reads the cursor as a different instant and pages overlap.
 - **Hostname detection**: API calls target whichever of `mathacademy.com` / `www.mathacademy.com` the user is logged in to (detected from the active tab).
 - **Outlier filtering**: XP/min statistics exclude activities with duration > 2 hours (user likely left the page open).
 - **Diagnostics**: treated as 100% attainment (earned XP used as both numerator and denominator) because diagnostics have no fixed base point value.

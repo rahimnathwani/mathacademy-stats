@@ -1,9 +1,11 @@
 import type { Activity } from '@/types/mathacademy';
+import { dedupeActivities } from '@/utils/dedupe-activities';
 
 const MAX_PAGES = 200;
 const SLEEP_MS = 200;
 const OVERLAP_DAYS = 1000;
 const VERBOSE = import.meta.env.DEV;
+const MAX_STALE_PAGES = 2;
 const CACHE_KEY = 'mathacademyActivitiesCache';
 
 type CachePayload = {
@@ -21,12 +23,13 @@ function readCache(): Activity[] {
     if (!raw) return [];
 
     const parsed = JSON.parse(raw) as CachePayload | Activity[];
+    // Dedupe on read so caches written by older versions heal themselves.
     if (Array.isArray(parsed)) {
-      return parsed;
+      return dedupeActivities(parsed);
     }
 
     if (parsed && Array.isArray(parsed.items)) {
-      return parsed.items;
+      return dedupeActivities(parsed.items);
     }
   } catch (err) {
     console.warn('Failed to read cached activities:', err);
@@ -89,29 +92,33 @@ async function getMathAcademyHostname(): Promise<string> {
   return 'mathacademy.com';
 }
 
-// Force the path to look like PST format with -0800 offset
-function toPSTPathString(d: Date): string {
-  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  const months = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
-  ];
+// Format a date the way the API expects in the URL path. The offset and zone
+// name must match the local clock values being sent; a mismatched label makes
+// the server read the cursor as a different instant, so pages overlap.
+function toApiPathString(d: Date): string {
+  const day = d.toLocaleDateString('en-US', { weekday: 'short' });
+  const month = d.toLocaleDateString('en-US', { month: 'short' });
   const pad2 = (n: number) => String(n).padStart(2, '0');
 
-  return `${days[d.getDay()]} ${months[d.getMonth()]} ${pad2(d.getDate())} ${d.getFullYear()} ${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())} GMT-0800 (Pacific Standard Time)`;
+  const offsetMinutes = -d.getTimezoneOffset();
+  const sign = offsetMinutes >= 0 ? '+' : '-';
+  const absMinutes = Math.abs(offsetMinutes);
+  const offset = `${pad2(Math.floor(absMinutes / 60))}${pad2(absMinutes % 60)}`;
+
+  let tzName = '';
+  try {
+    const parts = new Intl.DateTimeFormat('en-US', { timeZoneName: 'long' }).formatToParts(d);
+    const namePart = parts.find((p) => p.type === 'timeZoneName');
+    if (namePart) tzName = ` (${namePart.value})`;
+  } catch {
+    // Omit the friendly name; the numeric offset is still correct.
+  }
+
+  // The API uses rounded time increments, so seconds are always 00.
+  return `${day} ${month} ${pad2(d.getDate())} ${d.getFullYear()} ${pad2(d.getHours())}:${pad2(d.getMinutes())}:00 GMT${sign}${offset}${tzName}`;
 }
 
-const enc = (d: Date) => encodeURIComponent(toPSTPathString(d));
+const enc = (d: Date) => encodeURIComponent(toApiPathString(d));
 
 // Extract timestamp from activity item
 function getItemTimeMs(item: Activity): number | undefined {
@@ -199,15 +206,13 @@ export async function fetchAllActivities(
   const WINDOW_END = new Date();
   const WINDOW_START = new Date(Date.now() - 3 * 365 * 24 * 60 * 60 * 1000);
 
-  const newActivities: Activity[] = [];
-  const cachedIds = new Set<number>();
-
+  // Every activity seen so far (cache included), keyed by id. Pages can overlap,
+  // so an item only counts as new the first time its id shows up.
+  const seenIds = new Set<number>();
   for (const item of cachedActivities) {
-    const id = item?.id;
-    if (typeof id === 'number') {
-      cachedIds.add(id);
-    }
+    if (typeof item?.id === 'number') seenIds.add(item.id);
   }
+  const newActivities: Activity[] = [];
 
   let cursor = new Date(WINDOW_END);
   let pages = 0;
@@ -215,9 +220,11 @@ export async function fetchAllActivities(
 
   onProgress?.(`Starting fetch from ${cursor.toISOString()}...`);
 
-  let encounteredCachedItem = false;
+  // Consecutive pages that contained nothing new. We're caught up (or have
+  // reached already-cached history) once this reaches MAX_STALE_PAGES.
+  let stalePages = 0;
 
-  while (pages < MAX_PAGES && !encounteredCachedItem) {
+  while (pages < MAX_PAGES && stalePages < MAX_STALE_PAGES) {
     const page = await fetchPage(BASE_URL, cursor);
     if (VERBOSE) console.log(`Page ${pages + 1}: received ${page.length} items`);
     onProgress?.(
@@ -240,21 +247,23 @@ export async function fetchAllActivities(
 
     for (const item of page) {
       const id = item?.id;
-      if (typeof id === 'number' && cachedIds.has(id)) {
-        encounteredCachedItem = true;
-        onProgress?.('Encountered cached activity; stopping fetch.');
-        break;
+      if (typeof id === 'number') {
+        if (seenIds.has(id)) continue;
+        seenIds.add(id);
       }
-
       freshItems.push(item);
     }
 
-    if (freshItems.length > 0) {
-      newActivities.push(...freshItems);
-    }
+    newActivities.push(...freshItems);
 
-    if (encounteredCachedItem) {
-      break;
+    if (freshItems.length === 0) {
+      stalePages++;
+      if (stalePages >= MAX_STALE_PAGES) {
+        onProgress?.('No new activities in recent pages; stopping fetch.');
+        break;
+      }
+    } else {
+      stalePages = 0;
     }
 
     // Determine next cursor
@@ -300,7 +309,7 @@ export async function fetchAllActivities(
   }
 
   // Filter to window
-  const combined = [...newActivities, ...cachedActivities];
+  const combined = dedupeActivities([...newActivities, ...cachedActivities]);
 
   const inWindow = combined.filter((item) => {
     const t = getItemTimeMs(item);
