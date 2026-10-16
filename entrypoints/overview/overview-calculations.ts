@@ -1,5 +1,5 @@
 import type { Activity } from '@/types/mathacademy';
-import { toLocalDateKey } from '@/utils/dates';
+import { parseActivityTime, toLocalDateKey } from '@/utils/dates';
 import { classifyActivity, isDiagnostic } from '@/utils/classify-activity';
 
 /**
@@ -44,7 +44,7 @@ export function groupActivitiesByDay(activities: Activity[]): DailyData[] {
   const dailyGroups: { [key: string]: DailyData } = {};
 
   activities.forEach((activity) => {
-    const dateKey = toLocalDateKey(new Date(activity.completed));
+    const dateKey = toLocalDateKey(parseActivityTime(activity.completed));
 
     if (!dailyGroups[dateKey]) {
       dailyGroups[dateKey] = {
@@ -83,7 +83,7 @@ export function calculateAvgXPPerDay(activities: Activity[]): number {
 
   const totalXP = calculateTotalXP(activities);
 
-  const dates = activities.map((activity) => new Date(activity.completed).getTime());
+  const dates = activities.map((activity) => parseActivityTime(activity.completed).getTime());
   const firstDate = new Date(Math.min(...dates));
   const lastDate = new Date(Math.max(...dates));
 
@@ -207,7 +207,7 @@ export function getCourseTransitions(activities: Activity[]): CourseTransition[]
     const courseName = activity.test?.course?.name || 'Unknown';
 
     if (courseName !== currentCourse && courseName !== 'Unknown' && currentCourse !== 'Unknown') {
-      const timestamp = new Date(activity.completed).getTime() / 1000;
+      const timestamp = parseActivityTime(activity.completed).getTime() / 1000;
       transitions.push({
         timestamp,
         fromCourse: currentCourse,
@@ -285,7 +285,7 @@ export function filterActivitiesByPeriod(activities: Activity[], period: TimePer
   if (!start && !end) return activities;
 
   return activities.filter((activity) => {
-    const activityDate = new Date(activity.completed);
+    const activityDate = parseActivityTime(activity.completed);
     if (start && activityDate < start) return false;
     if (end && activityDate > end) return false;
     return true;

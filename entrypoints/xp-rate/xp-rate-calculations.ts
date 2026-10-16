@@ -1,5 +1,5 @@
 import type { Activity } from '@/types/mathacademy';
-import { toLocalDateKey } from '@/utils/dates';
+import { parseActivityTime, toLocalDateKey } from '@/utils/dates';
 import { getActivityDurationMinutes } from '@/utils/duration';
 
 /**
@@ -50,7 +50,7 @@ export function computeDailyRates(activities: Activity[]): DailyRate[] {
     const minutes = getActivityDurationMinutes(activity);
     if (minutes === null) continue;
 
-    const completed = new Date(activity.completed);
+    const completed = parseActivityTime(activity.completed);
     const key = toLocalDateKey(completed);
     const entry = byDay.get(key) ?? { xp: 0, minutes: 0 };
     entry.xp += activity.pointsAwarded;

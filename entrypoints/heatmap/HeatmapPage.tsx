@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import type { Activity } from '@/types/mathacademy';
-import { toLocalDateKey } from '@/utils/dates';
+import { parseActivityTime, toLocalDateKey } from '@/utils/dates';
 import { useStoredActivities } from '@/hooks/useStoredActivities';
 import { PageStatus } from '@/components/PageStatus';
 
@@ -30,7 +30,7 @@ function calculateDailyXP(activities: Activity[]): Map<string, DayData> {
   const dailyMap = new Map<string, DayData>();
 
   activities.forEach((activity) => {
-    const date = new Date(activity.completed);
+    const date = parseActivityTime(activity.completed);
     const dateKey = toLocalDateKey(date);
 
     if (!dailyMap.has(dateKey)) {

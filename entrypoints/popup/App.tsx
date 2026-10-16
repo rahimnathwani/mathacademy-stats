@@ -1,8 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import './App.css';
 import { fetchAllActivities, getCachedActivities, clearActivityCache } from './fetchActivities';
 import { downloadJSON, downloadCSV } from './downloads';
-import { storeActivities } from '@/utils/storage';
 import type { Activity } from '@/types/mathacademy';
 import type { PublicPath } from 'wxt/browser';
 
@@ -72,13 +71,19 @@ const REPORT_PAGES: ReportPage[] = [
 ];
 
 function App() {
-  const [activities, setActivities] = useState<Activity[]>(getCachedActivities);
+  const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(false);
-  const [progress, setProgress] = useState(() => {
-    const cachedCount = activities.length;
-    return cachedCount > 0 ? `Loaded ${cachedCount} cached activities.` : '';
-  });
+  const [progress, setProgress] = useState('');
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    getCachedActivities()
+      .then((cached) => {
+        setActivities(cached);
+        if (cached.length > 0) setProgress(`Loaded ${cached.length} cached activities.`);
+      })
+      .catch((err: unknown) => setError(`Failed to load cached activities: ${String(err)}`));
+  }, []);
 
   const hasData = activities.length > 0;
 
@@ -99,8 +104,8 @@ function App() {
     }
   };
 
-  const handleClearCache = () => {
-    clearActivityCache();
+  const handleClearCache = async () => {
+    await clearActivityCache();
     setActivities([]);
     setProgress('Cache cleared.');
     setError('');
@@ -110,9 +115,7 @@ function App() {
     if (report.needsData && !hasData) return;
 
     try {
-      if (report.needsData) {
-        await storeActivities(activities);
-      }
+      // Fetched activities are already in browser.storage.local, where report pages read them.
       await browser.tabs.create({ url: browser.runtime.getURL(report.path) });
     } catch (err) {
       setError(err instanceof Error ? err.message : `Failed to open ${report.label}`);

@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import type { Activity } from '@/types/mathacademy';
-import { toLocalDateKey } from '@/utils/dates';
+import { parseActivityTime, toLocalDateKey } from '@/utils/dates';
 import { useStoredActivities } from '@/hooks/useStoredActivities';
 import { PageStatus } from '@/components/PageStatus';
 import { CategoricalBarChart } from '@/components/CategoricalBarChart';
@@ -41,7 +41,7 @@ function calculateWeekdayData(activities: Activity[]): WeekdayData[] {
   >();
 
   activities.forEach((activity) => {
-    const date = new Date(activity.completed);
+    const date = parseActivityTime(activity.completed);
     const dayIndex = date.getDay(); // 0 = Sunday, 6 = Saturday
     const dateKey = toLocalDateKey(date);
 

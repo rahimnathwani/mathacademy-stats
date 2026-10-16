@@ -1,67 +1,55 @@
 import type { Activity } from '@/types/mathacademy';
+import {
+  clearStoredActivities,
+  loadActivitiesMeta,
+  loadStoredActivities,
+  storeActivities,
+} from '@/utils/storage';
 
-const MAX_PAGES = 200;
+/** How far back to fetch history. */
+const HISTORY_YEARS = 7;
+// 25 activities per page, so this allows 50,000 activities in one refresh.
+const MAX_PAGES = 2000;
 const SLEEP_MS = 200;
 const OVERLAP_DAYS = 1000;
 const VERBOSE = import.meta.env.DEV;
-const CACHE_KEY = 'mathacademyActivitiesCache';
+/** localStorage key used by versions up to 1.3.0; migrated to browser.storage.local. */
+const LEGACY_CACHE_KEY = 'mathacademyActivitiesCache';
 
-type CachePayload = {
-  items: Activity[];
-  updatedAt: string;
-};
-
-const hasLocalStorage = () => typeof localStorage !== 'undefined';
-
-function readCache(): Activity[] {
-  if (!hasLocalStorage()) return [];
+/** Read and remove the cache left in localStorage by versions up to 1.3.0. */
+function takeLegacyCache(): Activity[] {
+  if (typeof localStorage === 'undefined') return [];
 
   try {
-    const raw = localStorage.getItem(CACHE_KEY);
+    const raw = localStorage.getItem(LEGACY_CACHE_KEY);
     if (!raw) return [];
-
-    const parsed = JSON.parse(raw) as CachePayload | Activity[];
-    if (Array.isArray(parsed)) {
-      return parsed;
-    }
-
-    if (parsed && Array.isArray(parsed.items)) {
-      return parsed.items;
-    }
+    localStorage.removeItem(LEGACY_CACHE_KEY);
+    const parsed = JSON.parse(raw) as { items?: Activity[] } | Activity[];
+    if (Array.isArray(parsed)) return parsed;
+    return Array.isArray(parsed?.items) ? parsed.items : [];
   } catch (err) {
-    console.warn('Failed to read cached activities:', err);
-  }
-
-  return [];
-}
-
-function writeCache(items: Activity[]): void {
-  if (!hasLocalStorage()) return;
-
-  try {
-    const payload: CachePayload = {
-      items,
-      updatedAt: new Date().toISOString(),
-    };
-    localStorage.setItem(CACHE_KEY, JSON.stringify(payload));
-  } catch (err) {
-    console.warn('Failed to write cached activities:', err);
+    console.warn('Failed to read legacy cached activities:', err);
+    return [];
   }
 }
 
-export function getCachedActivities(): Activity[] {
-  const cached = readCache();
-  return sortActivities([...cached]);
+export async function getCachedActivities(): Promise<Activity[]> {
+  const stored = (await loadStoredActivities()) ?? [];
+  const legacy = takeLegacyCache();
+  if (legacy.length === 0) return sortActivities([...stored]);
+
+  // Older versions kept the cache in localStorage and copied it to storage.local only when a
+  // report was opened, so merge both. No coveredFrom: the next refresh backfills older history.
+  const byId = new Map<number, Activity>();
+  for (const item of [...stored, ...legacy]) byId.set(item.id, item);
+  const merged = sortActivities([...byId.values()]);
+  await storeActivities(merged);
+  return merged;
 }
 
-export function clearActivityCache(): void {
-  if (!hasLocalStorage()) return;
-
-  try {
-    localStorage.removeItem(CACHE_KEY);
-  } catch (err) {
-    console.warn('Failed to clear cached activities:', err);
-  }
+export async function clearActivityCache(): Promise<void> {
+  takeLegacyCache();
+  await clearStoredActivities();
 }
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -89,8 +77,16 @@ async function getMathAcademyHostname(): Promise<string> {
   return 'mathacademy.com';
 }
 
-// Force the path to look like PST format with -0800 offset
-function toPSTPathString(d: Date): string {
+const DAY_MS = 86_400_000;
+
+/**
+ * The API's timestamps are the user's wall-clock time labelled UTC (see `parseActivityTime`),
+ * and its cursor takes that same wall-clock time, written as a PST date string. So cursors here
+ * are "API time": milliseconds in the domain of `Date.parse(activity.completed)`, formatted
+ * with UTC getters. Using local getters instead put the cursor 7–8 hours early in the US
+ * Pacific timezone and skipped late-evening activities at page boundaries.
+ */
+function toCursorPath(apiMs: number): string {
   const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const months = [
     'Jan',
@@ -106,12 +102,15 @@ function toPSTPathString(d: Date): string {
     'Nov',
     'Dec',
   ];
+  const d = new Date(apiMs);
   const pad2 = (n: number) => String(n).padStart(2, '0');
-
-  return `${days[d.getDay()]} ${months[d.getMonth()]} ${pad2(d.getDate())} ${d.getFullYear()} ${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())} GMT-0800 (Pacific Standard Time)`;
+  const time = `${pad2(d.getUTCHours())}:${pad2(d.getUTCMinutes())}:${pad2(d.getUTCSeconds())}`;
+  const str = `${days[d.getUTCDay()]} ${months[d.getUTCMonth()]} ${pad2(d.getUTCDate())} ${d.getUTCFullYear()} ${time} GMT-0800 (Pacific Standard Time)`;
+  return encodeURIComponent(str);
 }
 
-const enc = (d: Date) => encodeURIComponent(toPSTPathString(d));
+/** The current wall-clock time, in API time. */
+const nowInApiTime = () => Date.now() - new Date().getTimezoneOffset() * 60_000;
 
 // Extract timestamp from activity item
 function getItemTimeMs(item: Activity): number | undefined {
@@ -146,8 +145,8 @@ function sortActivities(items: Activity[]): Activity[] {
   return items.sort((a, b) => bestTime(b) - bestTime(a));
 }
 
-async function fetchPage(baseUrl: string, cutoff: Date): Promise<Activity[]> {
-  const url = baseUrl + enc(cutoff);
+async function fetchPage(baseUrl: string, cursorMs: number): Promise<Activity[]> {
+  const url = baseUrl + toCursorPath(cursorMs);
   if (VERBOSE) console.log('GET', url);
 
   let response;
@@ -180,139 +179,117 @@ async function fetchPage(baseUrl: string, cutoff: Date): Promise<Activity[]> {
   return data;
 }
 
-export async function fetchAllActivities(
-  onProgress?: (message: string) => void
-): Promise<Activity[]> {
-  // Detect the current hostname and build the base URL
-  const hostname = await getMathAcademyHostname();
-  const BASE_URL = `https://${hostname}/api/previous-tasks/`;
+type WalkResult = {
+  items: Activity[];
+  /** True if the walk reached `stopBeforeMs` (or a known activity) rather than giving up early. */
+  complete: boolean;
+};
 
-  if (VERBOSE) console.log(`Using API base URL: ${BASE_URL}`);
-  onProgress?.(`Detected hostname: ${hostname}`);
+/**
+ * Page backwards through `/api/previous-tasks/` from `fromMs` until reaching `stopBeforeMs`,
+ * an activity whose id is in `knownIds`, or `MAX_PAGES`. Times are API time (see `toCursorPath`).
+ */
+async function walkBack(
+  baseUrl: string,
+  fromMs: number,
+  stopBeforeMs: number,
+  knownIds: Set<number>,
+  report: (pageItems: number, collected: number) => void
+): Promise<WalkResult> {
+  const items: Activity[] = [];
+  const seen = new Set<number>();
+  let cursor = fromMs;
 
-  const cachedActivities = getCachedActivities();
-  if (cachedActivities.length > 0) {
-    onProgress?.(`Loaded ${cachedActivities.length} cached activities.`);
-  }
+  for (let pages = 0; pages < MAX_PAGES; pages++) {
+    const page = await fetchPage(baseUrl, cursor);
+    report(page.length, items.length);
 
-  // Set window: last 3 years to now
-  const WINDOW_END = new Date();
-  const WINDOW_START = new Date(Date.now() - 3 * 365 * 24 * 60 * 60 * 1000);
-
-  const newActivities: Activity[] = [];
-  const cachedIds = new Set<number>();
-
-  for (const item of cachedActivities) {
-    const id = item?.id;
-    if (typeof id === 'number') {
-      cachedIds.add(id);
-    }
-  }
-
-  let cursor = new Date(WINDOW_END);
-  let pages = 0;
-  let lastCursorMs = cursor.getTime();
-
-  onProgress?.(`Starting fetch from ${cursor.toISOString()}...`);
-
-  let encounteredCachedItem = false;
-
-  while (pages < MAX_PAGES && !encounteredCachedItem) {
-    const page = await fetchPage(BASE_URL, cursor);
-    if (VERBOSE) console.log(`Page ${pages + 1}: received ${page.length} items`);
-    onProgress?.(
-      `Page ${pages + 1}: received ${page.length} items. Total new: ${newActivities.length}`
-    );
-
-    if (page.length === 0) {
-      if (VERBOSE) console.log(`Empty page — stepping back ${OVERLAP_DAYS} days`);
-      cursor = new Date(cursor.getTime() - OVERLAP_DAYS * 86400_000);
-
-      if (cursor < WINDOW_START) break;
-      if (cursor.getTime() === lastCursorMs) break;
-
-      lastCursorMs = cursor.getTime();
-      await sleep(SLEEP_MS);
-      continue;
-    }
-
-    const freshItems: Activity[] = [];
-
-    for (const item of page) {
-      const id = item?.id;
-      if (typeof id === 'number' && cachedIds.has(id)) {
-        encounteredCachedItem = true;
-        onProgress?.('Encountered cached activity; stopping fetch.');
-        break;
+    let next = cursor - OVERLAP_DAYS * DAY_MS; // empty page: jump back in case of a long gap
+    if (page.length > 0) {
+      for (const item of page) {
+        if (knownIds.has(item.id)) return { items, complete: true };
+        // Pages can overlap by a few activities; keep the first copy.
+        if (!seen.has(item.id)) {
+          seen.add(item.id);
+          items.push(item);
+        }
       }
-
-      freshItems.push(item);
+      const times = page.map(getItemTimeMs).filter((t): t is number => t !== undefined);
+      const oldest = times.length > 0 ? Math.min(...times) - 1 : Number.NaN; // -1ms: skip the oldest item
+      // A page should only hold activities older than the cursor; if not, stop rather than skip.
+      if (!(oldest < cursor)) return { items, complete: false };
+      next = oldest;
     }
 
-    if (freshItems.length > 0) {
-      newActivities.push(...freshItems);
-    }
-
-    if (encounteredCachedItem) {
-      break;
-    }
-
-    // Determine next cursor
-    const times = page
-      .map(getItemTimeMs)
-      .filter((t) => typeof t === 'number' && Number.isFinite(t)) as number[];
-
-    if (times.length > 0) {
-      const oldest = Math.min(...times);
-      const nextMs = oldest - 1; // Subtract 1ms to avoid re-fetching the last item
-      const next = new Date(nextMs);
-
-      if (!(nextMs < lastCursorMs)) {
-        if (VERBOSE)
-          console.warn(`No-progress cursor detected; forcing jump back ${OVERLAP_DAYS} days.`);
-        cursor = new Date(cursor.getTime() - OVERLAP_DAYS * 86400_000);
-      } else {
-        cursor = next;
-      }
-    } else {
-      if (VERBOSE) console.warn(`No parsable timestamps; forcing jump back ${OVERLAP_DAYS} days.`);
-      cursor = new Date(cursor.getTime() - OVERLAP_DAYS * 86400_000);
-    }
-
-    pages++;
-    if (VERBOSE)
-      console.log(
-        `Total new collected: ${newActivities.length}. Next cursor: ${cursor.toString()}`
-      );
-
-    if (cursor < WINDOW_START) {
-      if (VERBOSE) console.log('Crossed WINDOW_START; finishing pagination.');
-      break;
-    }
-
-    if (cursor.getTime() === lastCursorMs) {
-      if (VERBOSE) console.warn('Cursor unchanged after step; stopping to avoid loop.');
-      break;
-    }
-
-    lastCursorMs = cursor.getTime();
+    if (next < stopBeforeMs) return { items, complete: true };
+    cursor = next;
     await sleep(SLEEP_MS);
   }
 
-  // Filter to window
-  const combined = [...newActivities, ...cachedActivities];
+  return { items, complete: false };
+}
 
-  const inWindow = combined.filter((item) => {
+/**
+ * Fetch the last `HISTORY_YEARS` of activities, reusing what is already stored.
+ *
+ * 1. New activities: page back from now until reaching one that is already stored.
+ * 2. Older history: if the stored data doesn't reach back the full window (first run,
+ *    or data saved by a version with a shorter window), page back from the oldest
+ *    stored activity to the start of the window.
+ */
+export async function fetchAllActivities(
+  onProgress?: (message: string) => void
+): Promise<Activity[]> {
+  const hostname = await getMathAcademyHostname();
+  const BASE_URL = `https://${hostname}/api/previous-tasks/`;
+  if (VERBOSE) console.log(`Using API base URL: ${BASE_URL}`);
+  onProgress?.(`Detected hostname: ${hostname}`);
+
+  const cached = await getCachedActivities();
+  const meta = await loadActivitiesMeta();
+  if (cached.length > 0) onProgress?.(`Loaded ${cached.length} cached activities.`);
+
+  const windowStart = new Date(nowInApiTime());
+  windowStart.setUTCFullYear(windowStart.getUTCFullYear() - HISTORY_YEARS);
+  const startMs = windowStart.getTime();
+
+  const cachedIds = new Set(cached.map((item) => item.id));
+  // Start a day ahead so the newest activities are included whatever the timezone.
+  const fresh = await walkBack(BASE_URL, nowInApiTime() + DAY_MS, startMs, cachedIds, (n, total) =>
+    onProgress?.(`Fetching new activities: page of ${n}, ${total} new so far...`)
+  );
+
+  let older: WalkResult = { items: [], complete: true };
+  let coveredFrom = meta?.coveredFrom;
+  if (cached.length === 0) {
+    coveredFrom = fresh.complete ? windowStart.toISOString() : undefined;
+  } else if (!coveredFrom || new Date(coveredFrom) > windowStart) {
+    const oldestMs = Math.min(...cached.map((item) => getItemTimeMs(item) ?? Infinity));
+    if (Number.isFinite(oldestMs)) {
+      older = await walkBack(BASE_URL, oldestMs - 1, startMs, new Set(), (n, total) =>
+        onProgress?.(`Fetching older history: page of ${n}, ${total} older so far...`)
+      );
+      if (older.complete) coveredFrom = windowStart.toISOString();
+    }
+  }
+
+  // Merge, dropping duplicates, and keep the window.
+  const byId = new Map<number, Activity>();
+  for (const item of [...fresh.items, ...cached, ...older.items]) {
+    if (!byId.has(item.id)) byId.set(item.id, item);
+  }
+  const inWindow = [...byId.values()].filter((item) => {
     const t = getItemTimeMs(item);
-    if (t === undefined) return true;
-    return t >= WINDOW_START.getTime() && t <= WINDOW_END.getTime();
+    return t === undefined || t >= startMs;
   });
-
   sortActivities(inWindow);
 
-  writeCache(inWindow);
+  await storeActivities(inWindow, { coveredFrom });
 
-  onProgress?.(`Done! Collected ${inWindow.length} activities.`);
-
+  const partial = !fresh.complete || !older.complete;
+  onProgress?.(
+    `Done! Collected ${inWindow.length} activities.` +
+      (partial ? ' Stopped early; refresh again to fetch the rest.' : '')
+  );
   return inWindow;
 }

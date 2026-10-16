@@ -1,39 +1,39 @@
 import type { Activity } from '@/types/mathacademy';
-import { toLocalDateKey } from '@/utils/dates';
+import { parseActivityTime, toLocalDateKey } from '@/utils/dates';
 
-// Local timezone, matching the app's daily-grouping convention
-const formatDate = toLocalDateKey;
-
-function getDateRangeFromActivities(activities: Activity[]): { min: Date; max: Date } | null {
-  const completedTimes = activities
-    .map((item) => Date.parse(item.completed))
+/** `mathacademy_activities_<first>_to_<last>.<ext>`, dated by completion (user's wall-clock day). */
+function exportFileName(activities: Activity[], ext: string): string {
+  const times = activities
+    .map((item) => parseActivityTime(item.completed).getTime())
     .filter((t) => Number.isFinite(t));
 
-  if (completedTimes.length === 0) {
-    return null;
+  if (times.length === 0) {
+    return `mathacademy_activities_${toLocalDateKey(new Date())}.${ext}`;
   }
 
-  return {
-    min: new Date(Math.min(...completedTimes)),
-    max: new Date(Math.max(...completedTimes)),
-  };
+  const first = toLocalDateKey(new Date(Math.min(...times)));
+  const last = toLocalDateKey(new Date(Math.max(...times)));
+  return `mathacademy_activities_${first}_to_${last}.${ext}`;
 }
 
-export function downloadJSON(activities: Activity[]): void {
-  const dateRange = getDateRangeFromActivities(activities);
-  const fileName = dateRange
-    ? `mathacademy_activities_${formatDate(dateRange.min)}_to_${formatDate(dateRange.max)}.json`
-    : `mathacademy_activities_${formatDate(new Date())}.json`;
-
-  const blob = new Blob([JSON.stringify(activities, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
+function saveFile(content: string, type: string, fileName: string): void {
+  const url = URL.createObjectURL(new Blob([content], { type }));
   const a = document.createElement('a');
   a.href = url;
   a.download = fileName;
   document.body.appendChild(a);
   a.click();
-  URL.revokeObjectURL(url);
   a.remove();
+  // Revoking immediately can cancel the download in some browsers.
+  setTimeout(() => URL.revokeObjectURL(url), 10_000);
+}
+
+export function downloadJSON(activities: Activity[]): void {
+  saveFile(
+    JSON.stringify(activities, null, 2),
+    'application/json',
+    exportFileName(activities, 'json')
+  );
 }
 
 function escapeCSVField(value: unknown): string {
@@ -44,65 +44,36 @@ function escapeCSVField(value: unknown): string {
   const stringValue = String(value);
 
   // If the value contains comma, newline, or double quote, wrap in quotes and escape internal quotes
-  if (stringValue.includes(',') || stringValue.includes('\n') || stringValue.includes('"')) {
+  if (/[",\n\r]/.test(stringValue)) {
     return `"${stringValue.replace(/"/g, '""')}"`;
   }
 
   return stringValue;
 }
 
+const CSV_COLUMNS: [string, (a: Activity) => unknown][] = [
+  ['id', (a) => a.id],
+  ['type', (a) => a.type],
+  ['points', (a) => a.points],
+  ['pointsAwarded', (a) => a.pointsAwarded],
+  ['topic.id', (a) => a.topic?.id],
+  ['topic.name', (a) => a.topic?.name],
+  ['topic.course.id', (a) => a.topic?.course?.id],
+  ['topic.course.name', (a) => a.topic?.course?.name],
+  ['started', (a) => a.started],
+  ['completed', (a) => a.completed],
+  ['test.id', (a) => a.test?.id],
+  ['test.name', (a) => a.test?.name],
+  ['test.course.id', (a) => a.test?.course?.id],
+  ['test.course.name', (a) => a.test?.course?.name],
+];
+
 export function downloadCSV(activities: Activity[]): void {
-  const headers = [
-    'id',
-    'type',
-    'points',
-    'pointsAwarded',
-    'topic.id',
-    'topic.name',
-    'topic.course.id',
-    'topic.course.name',
-    'started',
-    'completed',
-    'test.id',
-    'test.name',
-    'test.course.id',
-    'test.course.name',
+  const lines = [
+    CSV_COLUMNS.map(([header]) => escapeCSVField(header)).join(','),
+    ...activities.map((activity) =>
+      CSV_COLUMNS.map(([, get]) => escapeCSVField(get(activity))).join(',')
+    ),
   ];
-
-  const rows = activities.map((activity) => [
-    activity.id,
-    activity.type,
-    activity.points,
-    activity.pointsAwarded,
-    activity.topic?.id,
-    activity.topic?.name,
-    activity.topic?.course?.id,
-    activity.topic?.course?.name,
-    activity.started,
-    activity.completed,
-    activity.test?.id,
-    activity.test?.name,
-    activity.test?.course?.id,
-    activity.test?.course?.name,
-  ]);
-
-  const csvContent = [
-    headers.map(escapeCSVField).join(','),
-    ...rows.map((row) => row.map(escapeCSVField).join(',')),
-  ].join('\n');
-
-  const dateRange = getDateRangeFromActivities(activities);
-  const fileName = dateRange
-    ? `mathacademy_activities_${formatDate(dateRange.min)}_to_${formatDate(dateRange.max)}.csv`
-    : `mathacademy_activities_${formatDate(new Date())}.csv`;
-
-  const blob = new Blob([csvContent], { type: 'text/csv' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = fileName;
-  document.body.appendChild(a);
-  a.click();
-  URL.revokeObjectURL(url);
-  a.remove();
+  saveFile(lines.join('\n'), 'text/csv', exportFileName(activities, 'csv'));
 }

@@ -28,7 +28,7 @@ WXT uses a file-based entrypoint system. Each HTML file at the top level is a pa
 
 - **popup/**: Extension popup UI
   - `App.tsx` - Report list (data-driven via `REPORT_PAGES`), fetch/refresh, exports
-  - `fetchActivities.ts` - Paginated API fetching with localStorage caching, hostname detection, and deduplication
+  - `fetchActivities.ts` - Paginated API fetching (7-year window), incremental refresh plus backfill of older history, hostname detection, deduplication
   - `downloads.ts` - JSON/CSV export
   - `stats.ts` - XP-per-minute statistics (used by the stats page)
 - **overview/**: Daily overview with uPlot time-series charts (`overview-calculations.ts` for aggregation, `chart-data.ts` for chart series)
@@ -47,14 +47,14 @@ WXT uses a file-based entrypoint system. Each HTML file at the top level is a pa
 
 - `components/` - `PageStatus` (loading/error/empty screens), `CategoricalBarChart` (uPlot bar chart)
 - `hooks/` - `useStoredActivities` (loads activities every report page starts from)
-- `utils/` - `storage.ts` (storage keys + helpers), `dates.ts` (`toLocalDateKey`), `classify-activity.ts` (single source of truth for lesson/review/quiz/multistep/diagnostic categorization)
+- `utils/` - `storage.ts` (storage keys + helpers), `dates.ts` (`toLocalDateKey`, `parseActivityTime`), `classify-activity.ts` (single source of truth for lesson/review/quiz/multistep/diagnostic categorization)
 - `types/mathacademy.ts` - Core data models: Activity, Course, Topic, Test, CourseStats, knowledge-graph types
 - `docs/api-samples/` - Example API responses for `/api/previous-tasks/` and the knowledge graph
 
 ### Data Flow
 
-1. **Fetch**: Popup calls `/api/previous-tasks/` with pagination and deduplication; caches in localStorage (key `mathacademyActivitiesCache`); stops when it hits a cached activity (incremental updates); fetches a 3-year window with 1000-day jumps on empty pages
-2. **Store**: Raw activities are saved to `browser.storage.local` (key in `utils/storage.ts`) when a report is opened
+1. **Fetch**: Popup calls `/api/previous-tasks/` (25 per page) for a 7-year window (`HISTORY_YEARS`), jumping back 1000 days on empty pages. New activities: page back from now until hitting a stored one. Older history: if `activitiesMeta.coveredFrom` doesn't reach the window start (first run, or data from a version with a shorter window), page back from the oldest stored activity. Versions up to 1.3.0 cached in localStorage (`mathacademyActivitiesCache`); `getCachedActivities` migrates it
+2. **Store**: Activities and `activitiesMeta` are saved to `browser.storage.local` (keys in `utils/storage.ts`) after every fetch; this is both the popup's cache and what report pages read
 3. **Display**: Report pages read from storage via `useStoredActivities` and render tables/charts (uPlot)
 
 ## Key Technical Details
@@ -67,10 +67,11 @@ WXT uses a file-based entrypoint system. Each HTML file at the top level is a pa
 ## Common Gotchas
 
 - **Content script registration**: WXT builds the content-script entrypoints but does not put MAIN-world scripts in the manifest; both are registered manually in `wxt.config.ts`. Removing that block silently drops them from the manifest.
-- **API date format**: `fetchActivities.ts` formats cursor dates as PST strings (`toPSTPathString`) because that's what the API expects in the URL path.
+- **API cursor format**: `toCursorPath` writes the cursor as a PST date string, which is what the API expects in the URL path. The value is the user's wall-clock time (same domain as `Date.parse(activity.completed)`), so it is formatted with UTC getters; local getters put it 7–8 hours early in US Pacific and skipped activities at page boundaries.
 - **Hostname detection**: API calls target whichever of `mathacademy.com` / `www.mathacademy.com` the user is logged in to (detected from the active tab).
 - **Outlier filtering**: XP/min statistics exclude activities with duration > 2 hours (user likely left the page open).
 - **Diagnostics**: treated as 100% attainment (earned XP used as both numerator and denominator) because diagnostics have no fixed base point value.
 - **Course attribution**: use `test.course.name`, not `topic.course.name` — it reflects the course the user was in, even when reviewing material from a prior course.
 - **Quiz detection**: some quizzes have a non-quiz `type`; `classifyActivity` checks the test name first. Always use it instead of ad-hoc type checks.
-- **Daily grouping**: always via `toLocalDateKey` (local timezone), never `toISOString()` (UTC shifts evening activities to the wrong day).
+- **Timestamps are wall-clock time labelled UTC**: `completed: "...T19:21:21.000Z"` comes with `timeCompletedStr: "7:21 PM"`. Parse with `parseActivityTime` before taking a date, hour or weekday; `new Date(activity.completed)` is fine only for differences and ordering.
+- **Daily grouping**: always via `toLocalDateKey(parseActivityTime(...))`, never `toISOString()`.

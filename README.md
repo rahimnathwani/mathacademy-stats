@@ -20,7 +20,7 @@ A browser extension for Chrome and Firefox that analyzes your [Math Academy](htt
 - **Task Types Analysis**: lessons, reviews, quizzes, multisteps, diagnostics breakdown
 - **Weekday Patterns**: average XP by day of week
 - **Upcoming Topics**: frontier topics ranked by how solid their prerequisites are
-- **Export**: full activity data as JSON, or CSV for spreadsheets
+- **Export**: up to 7 years of activity data as JSON, or CSV for spreadsheets
 
 ## Installation
 
@@ -58,13 +58,14 @@ Then load the output directory as an unpacked extension (steps above).
 - **XP per minute**: `pointsAwarded / durationMinutes`, grouped by the course you were in when you completed the activity
 - **Outlier filtering**: activities taking longer than 2 hours are excluded — a long gap usually means the tab was left open, not 2+ hours of continuous work
 - **Diagnostics**: counted as 100% attainment, since diagnostics have no fixed base point value
-- **Daily grouping**: uses your local timezone, so late-evening sessions count toward the right day
+- **History**: the last 7 years. The first fetch pages through everything; later refreshes fetch only new activities
+- **Daily grouping**: by the clock time Math Academy shows you. The API labels timestamps as UTC, but they are your local wall-clock time, so they are read that way and sessions after midnight count toward the right day
 
 ## Privacy
 
 - Your activity data is fetched directly from Math Academy's API using your existing login session
 - Everything is stored and processed locally in your browser; nothing is sent to any third-party server
-- Permissions: `storage` (pass data between popup and report pages), `tabs` (open report tabs, detect which Math Academy hostname you use), and host access to `mathacademy.com` (call the API)
+- Permissions: `storage` and `unlimitedStorage` (keep fetched activities between sessions; years of history can exceed the default quota), `tabs` (open report tabs, detect which Math Academy hostname you use), and host access to `mathacademy.com` (call the API)
 
 ## Development
 

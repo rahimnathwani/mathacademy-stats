@@ -11,7 +11,8 @@ export default defineConfig({
     name: 'Math Academy Stats',
     description:
       'Analyze your Math Academy activity data with statistics, exports to JSON/CSV, and performance insights',
-    permissions: ['storage', 'tabs', 'activeTab'],
+    // unlimitedStorage: years of history can exceed storage.local's 10 MB quota.
+    permissions: ['storage', 'unlimitedStorage', 'tabs', 'activeTab'],
     host_permissions: ['https://mathacademy.com/*', 'https://www.mathacademy.com/*'],
     // WXT builds these entrypoints but does not register MAIN-world content
     // scripts in the manifest, so both scripts are registered manually here.
